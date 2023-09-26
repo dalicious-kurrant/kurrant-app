@@ -6,6 +6,7 @@ import {Platform, ScrollView, NativeModules, Dimensions} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import styled, {useTheme} from 'styled-components/native';
+import Arrow from '~assets/icons/Group/arrowDown.svg';
 import Button from '~components/Button';
 import RefTextInput from '~components/RefTextInput';
 import Typography from '~components/Typography';
@@ -13,10 +14,12 @@ import Wrapper from '~components/Wrapper';
 import useKeyboardEvent from '~hook/useKeyboardEvent';
 
 import useUserMe from '../../../../../../../biz/useUserMe';
+import BottomSheetSelect from '../../../../../../../components/BottomSheetSelect';
 import {
   checkCorporateRegiNumber,
   isValidCardNumber,
 } from '../../../../../../../utils/cardFormatter';
+import {cardListData} from '../../../../../../../utils/statusFormatter';
 import {PAGE_NAME as PayCheckPasswordPageName} from '../../PayCheckPassword';
 const screenHeight = Dimensions.get('window').height;
 
@@ -32,6 +35,14 @@ const Pages = ({route}) => {
     mode: 'all',
   });
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectDefault, setSelectDefault] = useState();
+  const onSelectEvent = async id => {
+    console.log(id);
+    setSelectDefault(id);
+  };
+  const onSelectOpenModal = () => {
+    setModalVisible(true);
+  };
   const {StatusBarManager} = NativeModules;
   const card = form.watch('cardNumber');
   const keyboardEvent = useKeyboardEvent();
@@ -63,10 +74,12 @@ const Pages = ({route}) => {
     };
     const reqNice = {
       cardNumber: data.cardNumber?.replace(/\W/gi, ''),
+      corporationCode: cardListData.find(v => v.id === selectDefault).value,
       expirationYear: exp[1],
       expirationMonth: exp[0],
       cardPassword: data.cardPass,
-      identityNumber: data.cardCorpNumber,
+      identityNumber: data.cardBirthDay.substring(2),
+      cardType: '02',
       defaultType: cardList.length > 0 ? 0 : params?.defaultType || 0,
     };
     navigation.navigate(PayCheckPasswordPageName, {
@@ -138,6 +151,19 @@ const Pages = ({route}) => {
                   카드 정보
                 </Typography>
               </RegisteredTitleBox>
+              <DefaultCardBox>
+                <Typography text="Body06R" textColor={themeApp.colors.grey[4]}>
+                  카드사
+                </Typography>
+                <SpotView onPress={onSelectOpenModal}>
+                  <SpotName>
+                    {cardListData.find(v => v.id === selectDefault)
+                      ? cardListData.find(v => v.id === selectDefault).text
+                      : '선택'}
+                  </SpotName>
+                  <Arrow />
+                </SpotView>
+              </DefaultCardBox>
               <RegiteredView>
                 <RefTextInput
                   label="카드번호"
@@ -158,6 +184,7 @@ const Pages = ({route}) => {
                   }}
                 />
               </RegiteredView>
+
               <RegiteredView>
                 <RefTextInput
                   label="유효기간"
@@ -249,6 +276,15 @@ const Pages = ({route}) => {
           )}
         </FormProvider>
       </Wrapper>
+      <BottomSheetSelect
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        title="카드사"
+        data={cardListData}
+        selected={selectDefault}
+        setSelected={setSelectDefault}
+        height={200}
+      />
     </KeyboardAwareScrollView>
   );
 };
@@ -270,4 +306,20 @@ const ButtonBox = styled.View`
   margin-bottom: ${({isKeyboard}) => (isKeyboard ? '100px' : '24px')};
   background-color: ${({isKeyboard}) =>
     isKeyboard ? 'rgba(0,0,0,1)' : 'white'};
+`;
+
+const DefaultCardBox = styled.View``;
+
+const SpotView = styled.Pressable`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 24px;
+  border: 1px solid ${({theme}) => theme.colors.grey[7]};
+  border-radius: 14px;
+  width: 100%;
+  margin-top: 8px;
+`;
+const SpotName = styled(Typography).attrs({text: 'Body05R'})`
+  color: ${({theme}) => theme.colors.grey[2]};
 `;
