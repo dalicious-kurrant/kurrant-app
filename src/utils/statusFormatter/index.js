@@ -166,19 +166,41 @@ export function formattedLogin(data) {
       return data;
   }
 }
+
 export const cardListData = [
-  {id: 51, text: '삼성카드'},
-  // {id: 33, text: '우리카드'},
-  {id: 41, text: '신한카드'},
-  {id: 61, text: '현대카드'},
-  {id: 11, text: 'KB국민카드 (곧 사용 가능해요)'},
-  {id: 71, text: '롯데카드'},
-  {id: 91, text: 'NH농협카드'},
-  {id: 31, text: '비씨카드'},
-  {id: 21, text: '하나카드'},
-  // {id: 36, text: '씨티카드'},
-  // {id: 15, text: '카카오뱅크카드'},
+  {id: '01', text: '비씨', value: '01'},
+  // {id: '02', text: '국민', value: '02'},
+  // {id: '03', text: '하나', value: '03'},
+  {id: '04', text: '삼성', value: '04'},
+  {id: '06', text: '신한', value: '06'},
+  {id: '07', text: '현대드', value: '07'},
+  // {id: '08', text: '롯데', value: '08'},
+  {id: '11', text: '시티', value: '11'},
+  {id: '12', text: 'NH농협', value: '12'},
+  {id: '13', text: '수협', value: '13'},
+  {id: '15', text: '우리', value: '15'},
+  {id: '21', text: '광주', value: '21'},
+  {id: '22', text: '전북', value: '22'},
+  {id: '23', text: '제주', value: '23'},
+  // {id: '25', text: '해외비자', value: '25'},
+  // {id: '26', text: '해외마스터', value: '26'},
+  // {id: '27', text: '해외다이너스', value: '27'},
+  // {id: '28', text: '해외AMAX', value: '28'},
+  // {id: '29', text: '해외JCB', value: '29'},
+  // {id: '30', text: '해외', value: '30'},
+  {id: '32', text: '우체국', value: '32'},
+  {id: '33', text: 'MG새마을체크드', value: '33'},
+  // {id: '34', text: '중국은행체크', value: '34'},
+  // {id: '38', text: '은련', value: '38'},
+  {id: '41', text: '신협', value: '41'},
+  {id: '42', text: '저축은행', value: '42'},
+  // {id: '43', text: 'KDB산업', value: '43'},
+  // {id: '44', text: '카카오뱅크', value: '44'},
+  {id: '45', text: '케이뱅크', value: '45'},
+  // {id: '46', text: '카카오머니', value: '46'},
+  // {id: '47', text: 'SSG머니', value: '47'},
 ];
+
 export function formattedBoardOptionStatus(data) {
   if (data.length === 1 && data[0] === 0) {
     return '[공지] ';
