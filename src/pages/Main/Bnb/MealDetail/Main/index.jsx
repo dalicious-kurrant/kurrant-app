@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useAtom} from 'jotai';
+import LinearGradient from 'react-native-linear-gradient';
 import React, {
   useState,
   useRef,
@@ -44,7 +45,7 @@ import Balloon from '../../../../../components/Balloon';
 import ShoppingCart from '../../../../../components/BasketButton';
 import BottomModal from '../../../../../components/BottomModal';
 import Button from '../../../../../components/ButtonExtendable';
-import {YellowStar} from '../../../../../components/Icon';
+import {Heart, YellowStar} from '../../../../../components/Icon';
 import KeyboardAvoiding from '../../../../../components/KeyboardAvoiding';
 import Label from '../../../../../components/Label';
 import Modal from '../../../../../components/Modal';
@@ -982,25 +983,54 @@ const Pages = ({route}) => {
           value={count.toString()}
         />
         {!disableAddCartFromReview && !focus && !isMeal && (
-          <ButtonWrap>
-            <Button
-              price={foodDetailData?.price - discountPrice}
-              onPressEvent2={() => {
-                addCartPress();
-              }}
-              onPressEvent={() => {
-                bodyRef.current.focus();
-                focusPress();
-              }}
-              count={count}
-              cartCount={
-                cartCount[0] && cartCount[0][0] ? cartCount[0][0] || 0 : 0
-              }
-              capacity={foodDetailData?.capacity}
-              increasePress={increasePress}
-              decreasePress={decreasePress}
-            />
-          </ButtonWrap>
+          // <ButtonWrap>
+          //   <Button
+          //     price={foodDetailData?.price - discountPrice}
+          //     onPressEvent2={() => {
+          //       addCartPress();
+          //     }}
+          //     onPressEvent={() => {
+          //       bodyRef.current.focus();
+          //       focusPress();
+          //     }}
+          //     count={count}
+          //     cartCount={
+          //       cartCount[0] && cartCount[0][0] ? cartCount[0][0] || 0 : 0
+          //     }
+          //     capacity={foodDetailData?.capacity}
+          //     increasePress={increasePress}
+          //     decreasePress={decreasePress}
+          //   />
+
+          // </ButtonWrap>
+
+          <ButtonWrap2
+            colors={[
+              'rgba(255, 255, 255, 0.0)',
+              'rgba(255, 255, 255, 0.0)',
+              'rgba(255, 255, 255, 0.0)',
+              'rgba(255, 255, 255, 0.6)',
+              'rgba(255, 255, 255, 0.8)',
+              'rgba(255, 255, 255, 0.95)',
+              'rgba(255, 255, 255, 1)',
+              'rgba(255, 255, 255, 1)',
+              'rgba(255, 255, 255, 1)',
+            ]}
+            useAngle={true}
+            angle={180}>
+            <LikeButtonWrap>
+              <LikeButtonWrap2>
+                <Heart />
+
+                <LikeText>찜하기</LikeText>
+              </LikeButtonWrap2>
+            </LikeButtonWrap>
+            <BuyButtonWrap>
+              <Button2>
+                <BuyButtonText>구매하기</BuyButtonText>
+              </Button2>
+            </BuyButtonWrap>
+          </ButtonWrap2>
         )}
         <BalloonWrap
           message={'장바구니에 담았어요'}
@@ -1116,7 +1146,6 @@ const ButtonText = styled(Typography).attrs({text: 'Button10SB'})`
 const PriceTitleWrap = styled.View`
   flex-direction: row;
   align-items: center;
-  /* margin-top: 24px; */
 `;
 const PriceWrap = styled.View`
   flex-direction: row;
@@ -1133,7 +1162,6 @@ const InfoTitleView = styled.View`
 `;
 const InfoTextView = styled.View`
   width: 80%;
-  /* border: 1px solid black; */
 `;
 
 const ItemInfoTitle = styled(Typography).attrs({text: 'Body06SB'})`
@@ -1168,6 +1196,8 @@ const ButtonWrap = styled.View`
   width: 100%;
 `;
 
+// 새 버튼
+
 const ModalWrap = styled.View`
   margin-left: 2px;
   width: 20px;
@@ -1192,7 +1222,6 @@ const InformationText = styled(Typography).attrs({text: 'ButtonSB'})`
 const MealDsc = styled(Typography).attrs({text: 'Body06R'})`
   color: ${props => props.theme.colors.grey[4]};
   margin-bottom: 8px;
-  /* border: 1px solid black; */
 `;
 
 const PriceTitle = styled(Typography).attrs({text: 'CaptionR'})`
@@ -1358,4 +1387,48 @@ const Filler = styled.View`
       return 100;
     }
   }}px;
+`;
+
+const ButtonWrap2 = styled(LinearGradient)`
+  position: absolute;
+
+  bottom: 0px;
+  width: 100%;
+  flex-direction: row;
+
+  padding: 0px 24px;
+  padding-bottom: 35px;
+`;
+
+const LikeButtonWrap = styled.View`
+  flex: 48;
+
+  flex-direction: row;
+`;
+
+const LikeButtonWrap2 = styled.View`
+  align-items: center;
+
+  height: 56px;
+  justify-content: space-between;
+`;
+
+const LikeText = styled(Typography).attrs({text: 'Button10SB'})`
+  color: ${({theme}) => theme.colors.grey[2]};
+`;
+const BuyButtonWrap = styled.View`
+  flex: 279;
+`;
+const Button2 = styled.Pressable`
+  height: 100%;
+  background-color: ${({theme}) => theme.colors.yellow[500]};
+  border-radius: 100px;
+
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+const BuyButtonText = styled(Typography).attrs({text: 'BottomButtonSB'})`
+  color: ${({theme}) => theme.colors.grey[1]};
 `;
