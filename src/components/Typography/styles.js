@@ -131,6 +131,7 @@ export const textStyles = {
     line-height: 19px;
     font-family: 'Pretendard-Regular';
   `,
+
   CaptionR: css`
     font-size: 13px;
     line-height: 19px;

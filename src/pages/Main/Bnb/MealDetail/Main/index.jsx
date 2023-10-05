@@ -62,6 +62,7 @@ import {PAGE_NAME as MealInformationPageName} from '../../MealDetail/Page';
 import CarouselImage from '../components/CarouselImage';
 import MembershipDiscountBox from '../components/MembershipDiscountBox';
 import Skeleton from '../Skeleton';
+import {Text} from 'react-native';
 
 const screenWidth = Dimensions.get('screen').width;
 
@@ -698,57 +699,82 @@ const Pages = ({route}) => {
                                     <InfoTitle>할인 내역</InfoTitle>
                                   </InfoTitleView>
                                   <InfoTextView>
-                                    <InfoTextWrap>
+                                    <InfoText1>
                                       {foodDetailData?.membershipDiscountedRate !==
-                                      0 ? (
-                                        <Info>멤버십 할인</Info>
-                                      ) : (
-                                        <Info>멤버십 가입시 할인</Info>
-                                      )}
-                                      {foodDetailData?.membershipDiscountedRate !==
-                                      0 ? (
-                                        <InfoText>
-                                          {
-                                            foodDetailData?.membershipDiscountedRate
-                                          }
-                                          %
-                                        </InfoText>
-                                      ) : (
-                                        <InfoText>
-                                          {
-                                            isfoodDetailDiscount?.membershipDiscountRate
-                                          }
-                                          %
-                                        </InfoText>
-                                      )}
-                                    </InfoTextWrap>
-                                    <InfoTextWrap>
-                                      <Info>판매자 할인</Info>
-                                      <InfoText>
-                                        {foodDetailData?.makersDiscountedRate}%
-                                      </InfoText>
-                                    </InfoTextWrap>
-                                    <InfoTextWrap>
-                                      <Info>기간 할인</Info>
-                                      <InfoText>
-                                        {foodDetailData?.periodDiscountedRate}%
-                                      </InfoText>
-                                    </InfoTextWrap>
+                                      0
+                                        ? `멤버십 할인 ${foodDetailData?.membershipDiscountedRate}% `
+                                        : `멤버십 가입시 할인 ${isfoodDetailDiscount?.membershipDiscountedRate}%`}
+                                      {foodDetailData?.makersDiscountedRate !==
+                                      0
+                                        ? `, 판매자 할인 ${foodDetailData?.makersDiscountedRate}%`
+                                        : ``}
+                                      {foodDetailData?.periodDiscountedRate !==
+                                      0
+                                        ? `, 기간 할인 ${foodDetailData?.periodDiscountedRate}%`
+                                        : ``}
+                                    </InfoText1>
                                   </InfoTextView>
                                 </InfoWrap>
+
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>적립 포인트</InfoTitle>
+                                  </InfoTitleView>
+
+                                  <InfoTextView>
+                                    <InfoText1>
+                                      최대 <BlueInfoText1>23,444</BlueInfoText1>{' '}
+                                      포인트 적립
+                                    </InfoText1>
+                                    <InfoText2>기본 적립 113P</InfoText2>
+                                    <InfoText2>멤버십 적립 1,000P</InfoText2>
+                                    <InfoText2>리뷰 적립 100P</InfoText2>
+                                  </InfoTextView>
+                                </InfoWrap>
+
                                 <InfoWrap>
                                   <InfoTitleView>
                                     <InfoTitle>배송 정보</InfoTitle>
                                   </InfoTitleView>
                                   <InfoTextView>
-                                    <InfoTextWrap>
-                                      <Info>개별 배송</Info>
-                                      <InfoText>3,500원</InfoText>
-                                    </InfoTextWrap>
-                                    <InfoTextWrap>
-                                      <Info>멤버십 회원</Info>
-                                      <InfoText>무료 배송</InfoText>
-                                    </InfoTextWrap>
+                                    <InfoText1>2,500원</InfoText1>
+                                    <InfoText2>
+                                      N원 이상 구매 시 무료 / 제주 추가 3,000원
+                                    </InfoText2>
+                                    <InfoText2>
+                                      제주 외 도서지역 추가 3,000원
+                                    </InfoText2>
+                                  </InfoTextView>
+                                </InfoWrap>
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>배송 기간</InfoTitle>
+                                  </InfoTitleView>
+                                  <InfoTextView>
+                                    <InfoText1>
+                                      8/31(수)이내 도착 예정
+                                    </InfoText1>
+                                  </InfoTextView>
+                                </InfoWrap>
+                              </Content>
+                              <Content>
+                                <ItemInfoTitle>상품정보</ItemInfoTitle>
+
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>제조사</InfoTitle>
+                                  </InfoTitleView>
+                                  <InfoTextView>
+                                    <Text>전정호 틈새라면</Text>
+                                  </InfoTextView>
+                                </InfoWrap>
+
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>브랜드</InfoTitle>
+                                  </InfoTitleView>
+                                  <InfoTextView>
+                                    <Text>전정호 틈새라면</Text>
                                   </InfoTextView>
                                 </InfoWrap>
                               </Content>
@@ -1043,6 +1069,50 @@ const InformationWrap = styled.Pressable`
   margin-bottom: 8px;
 `;
 
+////// 해쉬테그
+
+const Wrap3 = styled.View`
+  width: ${() => {
+    const Wrap3Width = Dimensions.get('screen').width - 2 * 24;
+
+    return `${Wrap3Width}px;`;
+  }};
+  margin-bottom: 16px;
+`;
+
+const ThinGreyLine = styled.View`
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: ${({theme}) => theme.colors.grey[7]};
+  margin-bottom: 16px;
+`;
+
+const ButtonPressable = styled.Pressable`
+  ${({isClicked, theme}) =>
+    !isClicked && `border: 1px solid ${theme.colors.grey[6]};`}
+
+  border-radius: 50px;
+
+  margin-left: 4px;
+  margin-right: 4px;
+  padding: 6.6px 12px;
+
+  ${({isFirst}) => isFirst && `margin-left: 0px;`}
+  ${({isLast}) => isLast && `margin-right: 40px;`}
+
+  ${({isClicked, theme}) =>
+    isClicked && `background-color: ${theme.colors.grey[2]}`}
+
+  align-items: center;
+  justify-content: center;
+`;
+
+const ButtonText = styled(Typography).attrs({text: 'Button10SB'})`
+  color: ${({theme, isClicked}) =>
+    isClicked ? '#ffffff' : theme.colors.grey[2]};
+`;
+
 const PriceTitleWrap = styled.View`
   flex-direction: row;
   align-items: center;
@@ -1055,7 +1125,7 @@ const PriceWrap = styled.View`
 `;
 const InfoWrap = styled.View`
   flex-direction: row;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 `;
 
 const InfoTitleView = styled.View`
@@ -1063,6 +1133,26 @@ const InfoTitleView = styled.View`
 `;
 const InfoTextView = styled.View`
   width: 80%;
+  /* border: 1px solid black; */
+`;
+
+const ItemInfoTitle = styled(Typography).attrs({text: 'Body06SB'})`
+  color: ${props => props.theme.colors.grey[2]};
+  margin-bottom: 8px;
+`;
+
+const InfoText1 = styled(Typography).attrs({text: 'CaptionR'})`
+  color: ${props => props.theme.colors.grey[2]};
+  margin-bottom: 4px;
+`;
+const BlueInfoText1 = styled(Typography).attrs({text: 'CaptionR'})`
+  color: ${props => props.theme.colors.blue[500]};
+  margin-bottom: 4px;
+`;
+
+const InfoText2 = styled(Typography).attrs({text: 'SmallLabel'})`
+  color: ${props => props.theme.colors.grey[4]};
+  margin-bottom: 4px;
 `;
 
 const InfoTextWrap = styled.View`
@@ -1128,7 +1218,7 @@ export const Price = styled(Typography).attrs({text: 'Body06R'})`
 `;
 
 const InfoTitle = styled(Typography).attrs({text: 'CaptionR'})`
-  color: ${props => props.theme.colors.grey[3]};
+  color: ${props => props.theme.colors.grey[4]};
 `;
 
 const Info = styled(Typography).attrs({text: 'CaptionR'})`
@@ -1268,48 +1358,4 @@ const Filler = styled.View`
       return 100;
     }
   }}px;
-`;
-
-//////
-
-const Wrap3 = styled.View`
-  width: ${() => {
-    const Wrap3Width = Dimensions.get('screen').width - 2 * 24;
-
-    return `${Wrap3Width}px;`;
-  }};
-  margin-bottom: 16px;
-`;
-
-const ThinGreyLine = styled.View`
-  width: 100%;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: ${({theme}) => theme.colors.grey[7]};
-  margin-bottom: 16px;
-`;
-
-const ButtonPressable = styled.Pressable`
-  ${({isClicked, theme}) =>
-    !isClicked && `border: 1px solid ${theme.colors.grey[6]};`}
-
-  border-radius: 50px;
-
-  margin-left: 4px;
-  margin-right: 4px;
-  padding: 6.6px 12px;
-
-  ${({isFirst}) => isFirst && `margin-left: 0px;`}
-  ${({isLast}) => isLast && `margin-right: 40px;`}
-
-  ${({isClicked, theme}) =>
-    isClicked && `background-color: ${theme.colors.grey[2]}`}
-
-  align-items: center;
-  justify-content: center;
-`;
-
-const ButtonText = styled(Typography).attrs({text: 'Button10SB'})`
-  color: ${({theme, isClicked}) =>
-    isClicked ? '#ffffff' : theme.colors.grey[2]};
 `;
