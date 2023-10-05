@@ -40,7 +40,7 @@ const SearchResult = ({route}) => {
 
   return (
     <Wrap>
-      <View>
+      <View style={{marginBottom: 8}}>
         <Search
           setFocus={setFocus}
           focus={focus}

@@ -104,7 +104,7 @@ const Wrap = styled.ScrollView`
 `;
 
 const Contents = styled.Pressable`
-  padding: 16px 0px 16px 24px;
+  padding: 16px 16px 16px 24px;
   border-bottom: solid;
   border-bottom-width: 1px;
   border-color: ${({theme}) => theme.colors.grey[8]};

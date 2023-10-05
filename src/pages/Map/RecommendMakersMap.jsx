@@ -130,11 +130,11 @@ const RecommendMakersMap = ({route}) => {
         <DeliverySpotText>배송 받을 스팟</DeliverySpotText>
         <SpotListView>
           {spotListData?.map(el =>
-            el.spots.map(v => (
+            el?.spots?.map(v => (
               <Pressable
                 onPress={() => setSelectId(v.spotId)}
                 key={v.spotId}
-                disabled={resData?.recommendSpotId}>
+                disabled={resData?.recommendSpotId !== undefined}>
                 <SpotWrap>
                   <SpotText>{el.clientName + ' ' + v.spotName}</SpotText>
                   {(selectId === v.spotId ||
