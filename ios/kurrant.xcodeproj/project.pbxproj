@@ -12,6 +12,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		2A24AC882ACE5EF0006CCC8A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2A24AC872ACE5EF0006CCC8A /* GoogleService-Info.plist */; };
 		2D06190E73714727B88B24AD /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 0D0B237079174AF998E87B6E /* LICENSE */; };
 		58C6DE8A34F648238F740925 /* Pretendard-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 66B03DD34E384B649F760C33 /* Pretendard-Thin.otf */; };
 		5A89C246B1EC4F4F9EDFE5AE /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = DCA932196CC34D13A6907957 /* Pretendard-ExtraLight.otf */; };
@@ -22,7 +23,6 @@
 		A6E2DF83B7D3442987129D5D /* Pretendard-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 763A59BDFCC64FBFBFE34199 /* Pretendard-Bold.otf */; };
 		B005111A2930A11C0035F28D /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = B00511192930A11C0035F28D /* Fonts */; };
 		B065B7152A1C335200C75E5A /* main.m in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		B068103B2966B4E700A4D3AB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B068103A2966B4E700A4D3AB /* GoogleService-Info.plist */; };
 		B4D2137514CC45B88DE9C20C /* Pretendard-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 89AB231CA7C14416B4894EA1 /* Pretendard-Regular.otf */; };
 		B7DB5E91EEE741959BCEC57C /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 027BC5742DEB44B788FDCD2A /* OFL.txt */; };
 		D3F9877D297916AE00B61198 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F9877C297916AE00B61198 /* File.swift */; };
@@ -87,6 +87,8 @@
 		22BBEF94038F490D84968664 /* NotoSansKR-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NotoSansKR-Bold.otf"; path = "../src/assets/fonts/NotoSansKR/NotoSansKR-Bold.otf"; sourceTree = "<group>"; };
 		2837ECA71A33470D84964E57 /* SpoqaHanSansNeo-Thin.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SpoqaHanSansNeo-Thin.otf"; path = "../src/assets/fonts/SpoqaHanSansNeo/SpoqaHanSansNeo-Thin.otf"; sourceTree = "<group>"; };
 		2932966F926A43E3B5928532 /* SpoqaHanSansNeo-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SpoqaHanSansNeo-Light.otf"; path = "../src/assets/fonts/SpoqaHanSansNeo/SpoqaHanSansNeo-Light.otf"; sourceTree = "<group>"; };
+		2A24AC862ACE5851006CCC8A /* kurrantRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = kurrantRelease.entitlements; path = kurrant/kurrantRelease.entitlements; sourceTree = "<group>"; };
+		2A24AC872ACE5EF0006CCC8A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2A7A75042A0E0348009F0DB7 /* coin.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = coin.wav; sourceTree = "<group>"; };
 		2ABB8D9B2A1B4A2200E8AD46 /* Permission_Notifications.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Permission_Notifications.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2ABB8D9D2A1B4C3A00E8AD46 /* RNPermissions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RNPermissions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,12 +108,10 @@
 		9AEDF384CAA848929259B0C5 /* Pretendard-Black.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Black.otf"; path = "../src/assets/fonts/Pretendard/Pretendard-Black.otf"; sourceTree = "<group>"; };
 		A176505381824262A03659BF /* NotoSansKR-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NotoSansKR-Regular.otf"; path = "../src/assets/fonts/NotoSansKR/NotoSansKR-Regular.otf"; sourceTree = "<group>"; };
 		B00511192930A11C0035F28D /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
-		B068103A2966B4E700A4D3AB /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "kurrant/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B986C349B7BA49C21709CBBD /* Pods-kurrant-kurrantTests.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kurrant-kurrantTests.staging.xcconfig"; path = "Target Support Files/Pods-kurrant-kurrantTests/Pods-kurrant-kurrantTests.staging.xcconfig"; sourceTree = "<group>"; };
 		BA7A73388BE4B74E96CC07B4 /* Pods-kurrant.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kurrant.release.xcconfig"; path = "Target Support Files/Pods-kurrant/Pods-kurrant.release.xcconfig"; sourceTree = "<group>"; };
 		BB88AAD1C21847FB868A3C00 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-ExtraBold.otf"; path = "../src/assets/fonts/Pretendard/Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
 		C0A217AEDFE0481FB9F3985D /* Pretendard-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Light.otf"; path = "../src/assets/fonts/Pretendard/Pretendard-Light.otf"; sourceTree = "<group>"; };
-		D35B52932963C45A00368C90 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D3B3EB672977DB7A000B91E6 /* kurrant.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = kurrant.entitlements; path = kurrant/kurrant.entitlements; sourceTree = "<group>"; };
 		D3F9877B297916AD00B61198 /* kurrant-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kurrant-Bridging-Header.h"; sourceTree = "<group>"; };
 		D3F9877C297916AE00B61198 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
@@ -207,8 +207,8 @@
 		13B07FAE1A68108700A75B9A /* kurrant */ = {
 			isa = PBXGroup;
 			children = (
+				2A24AC862ACE5851006CCC8A /* kurrantRelease.entitlements */,
 				D3B3EB672977DB7A000B91E6 /* kurrant.entitlements */,
-				D35B52932963C45A00368C90 /* GoogleService-Info.plist */,
 				FF1331DC28E17BDC00D27A78 /* Fonts */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -250,6 +250,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				2A24AC872ACE5EF0006CCC8A /* GoogleService-Info.plist */,
 				2A7A75032A0E0343009F0DB7 /* sounds */,
 				D3F9877C297916AE00B61198 /* File.swift */,
 				B00511192930A11C0035F28D /* Fonts */,
@@ -278,7 +279,6 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
 				D12D4AE88C0F415484ECEB94 /* Resources */,
-				D3DB00FC2970EB6500652E32 /* Recovered References */,
 				D3F9877B297916AD00B61198 /* kurrant-Bridging-Header.h */,
 			);
 			indentWidth = 2;
@@ -335,14 +335,6 @@
 				0D0B237079174AF998E87B6E /* LICENSE */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
-		};
-		D3DB00FC2970EB6500652E32 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				B068103A2966B4E700A4D3AB /* GoogleService-Info.plist */,
-			);
-			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		FF1331DC28E17BDC00D27A78 /* Fonts */ = {
@@ -416,7 +408,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				4A97A4197D346B5F723F331E /* [CP] Embed Pods Frameworks */,
 				FD2803300DEC96EEED03C39B /* [CP] Copy Pods Resources */,
-				E930022E58F9BD4A8E7AC65E /* [CP-User] [RNFB] Core Configuration */,
+				D685AA30BF44C003C9733CD1 /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -477,6 +469,7 @@
 			files = (
 				B065B7152A1C335200C75E5A /* main.m in Resources */,
 				FF13321828E1CC5100D27A78 /* SpoqaHanSansNeo-Bold.otf in Resources */,
+				2A24AC882ACE5EF0006CCC8A /* GoogleService-Info.plist in Resources */,
 				FF13321928E1CC5100D27A78 /* SpoqaHanSansNeo-Light.otf in Resources */,
 				FF13321A28E1CC5100D27A78 /* SpoqaHanSansNeo-Medium.otf in Resources */,
 				FF13321B28E1CC5100D27A78 /* SpoqaHanSansNeo-Regular.otf in Resources */,
@@ -486,7 +479,6 @@
 				FF090BE928E2ECD900666784 /* FontAwesome.ttf in Resources */,
 				FF090BEA28E2ECD900666784 /* FontAwesome5_Regular.ttf in Resources */,
 				FF090BEB28E2ECD900666784 /* Octicons.ttf in Resources */,
-				B068103B2966B4E700A4D3AB /* GoogleService-Info.plist in Resources */,
 				FF090BEC28E2ECD900666784 /* AntDesign.ttf in Resources */,
 				FF090BED28E2ECD900666784 /* Feather.ttf in Resources */,
 				FF090BEE28E2ECD900666784 /* SimpleLineIcons.ttf in Resources */,
@@ -614,7 +606,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E930022E58F9BD4A8E7AC65E /* [CP-User] [RNFB] Core Configuration */ = {
+		D685AA30BF44C003C9733CD1 /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (

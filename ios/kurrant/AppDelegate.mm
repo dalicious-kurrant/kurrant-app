@@ -8,6 +8,7 @@
 #import <RNKakaoLogins.h>
 #import <React/RCTAppSetupUtils.h>
 #import <Firebase.h>
+#import <UserNotifications/UserNotifications.h>
 #import <RNGoogleSignin/RNGoogleSignin.h>
 #import "RNFBMessagingModule.h"
 #import <CodePush/CodePush.h>

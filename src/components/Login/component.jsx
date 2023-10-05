@@ -58,9 +58,15 @@ const Component = ({userId, isPassword, setPassword}) => {
     try {
       const res = await login(datas);
       setStorage('userId', datas.email);
-      if (res?.data?.accessToken) {
-        await getToken();
-      }
+      // if (res?.data?.accessToken) {
+      //   const authStatus = await messaging().hasPrermission();
+      //   const enabled =
+      //     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      //     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      //   if (enabled) {
+      //     await getToken();
+      //   }
+      // }
       if (res.data.hasNickname) {
         navigation.reset({
           index: 0,
