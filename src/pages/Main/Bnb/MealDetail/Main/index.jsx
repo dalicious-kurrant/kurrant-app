@@ -384,6 +384,8 @@ const Pages = ({route}) => {
         return resizeImage(image);
       });
   }, [foodDetailData, dailyFoodId]);
+
+  const keyword1 = ['라라랄', '럴럴럴'];
   return (
     <>
       <Wrap>
@@ -556,6 +558,50 @@ const Pages = ({route}) => {
                                         label={`${foodDetailData?.spicy}`}
                                       />
                                     )}
+
+                                    <Wrap3>
+                                      <FlatList
+                                        data={keyword1}
+                                        scrollEnabled={true}
+                                        showsVerticalScrollIndicator={false}
+                                        showsHorizontalScrollIndicator={false}
+                                        horizontal={true}
+                                        initialNumToRender={5}
+                                        contentContainerStyle={{
+                                          // height: 56,
+                                          alignItems: 'center',
+                                        }}
+                                        renderItem={({item, index}) => {
+                                          return (
+                                            <ButtonPressable
+                                              onPress={() => {
+                                                if (selectedKeyword === item) {
+                                                  setSelectedKeyword('');
+                                                } else {
+                                                  setSelectedKeyword(item);
+                                                }
+                                              }}
+                                              isClicked={
+                                                selectedKeyword === item
+                                              }
+                                              isFirst={index === 0}
+                                              isLast={
+                                                index === keyword1.length - 1
+                                              }>
+                                              <ButtonText
+                                                isClicked={
+                                                  selectedKeyword === item
+                                                }>
+                                                #{item}
+                                              </ButtonText>
+                                            </ButtonPressable>
+                                          );
+                                        }}
+                                      />
+                                    </Wrap3>
+
+                                    <ThinGreyLine />
+
                                     <PriceTitleWrap>
                                       <PriceTitle>최종 판매가</PriceTitle>
                                       <ModalWrap>
@@ -645,6 +691,7 @@ const Pages = ({route}) => {
                                   )}
                                 </Content>
                               </TouchableWithoutFeedback>
+
                               <Content>
                                 <InfoWrap>
                                   <InfoTitleView>
@@ -999,7 +1046,7 @@ const InformationWrap = styled.Pressable`
 const PriceTitleWrap = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-top: 24px;
+  /* margin-top: 24px; */
 `;
 const PriceWrap = styled.View`
   flex-direction: row;
@@ -1055,6 +1102,7 @@ const InformationText = styled(Typography).attrs({text: 'ButtonSB'})`
 const MealDsc = styled(Typography).attrs({text: 'Body06R'})`
   color: ${props => props.theme.colors.grey[4]};
   margin-bottom: 8px;
+  /* border: 1px solid black; */
 `;
 
 const PriceTitle = styled(Typography).attrs({text: 'CaptionR'})`
@@ -1220,4 +1268,48 @@ const Filler = styled.View`
       return 100;
     }
   }}px;
+`;
+
+//////
+
+const Wrap3 = styled.View`
+  width: ${() => {
+    const Wrap3Width = Dimensions.get('screen').width - 2 * 24;
+
+    return `${Wrap3Width}px;`;
+  }};
+  margin-bottom: 16px;
+`;
+
+const ThinGreyLine = styled.View`
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: ${({theme}) => theme.colors.grey[7]};
+  margin-bottom: 16px;
+`;
+
+const ButtonPressable = styled.Pressable`
+  ${({isClicked, theme}) =>
+    !isClicked && `border: 1px solid ${theme.colors.grey[6]};`}
+
+  border-radius: 50px;
+
+  margin-left: 4px;
+  margin-right: 4px;
+  padding: 6.6px 12px;
+
+  ${({isFirst}) => isFirst && `margin-left: 0px;`}
+  ${({isLast}) => isLast && `margin-right: 40px;`}
+
+  ${({isClicked, theme}) =>
+    isClicked && `background-color: ${theme.colors.grey[2]}`}
+
+  align-items: center;
+  justify-content: center;
+`;
+
+const ButtonText = styled(Typography).attrs({text: 'Button10SB'})`
+  color: ${({theme, isClicked}) =>
+    isClicked ? '#ffffff' : theme.colors.grey[2]};
 `;
