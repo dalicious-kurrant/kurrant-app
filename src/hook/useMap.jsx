@@ -30,6 +30,7 @@ export function useGetAddress(roadAddress) {
 }
 
 export function useGetMakersAddress(makersCood) {
+  console.log(makersCood, 'hook');
   return useQuery(
     'makersAddress',
     () => {
@@ -39,7 +40,7 @@ export function useGetMakersAddress(makersCood) {
       );
     },
     {
-      enabled: Object.keys(makersCood).length > 0,
+      // enabled: makersCood,
       retry: false,
     },
   );

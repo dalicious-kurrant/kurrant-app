@@ -1,145 +1,271 @@
-import {KakaoMapView} from '@jiggag/react-native-kakao-maps';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useAtom} from 'jotai';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {
-  Pressable,
-  View,
-  Image,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {Shadow} from 'react-native-shadow-2';
+import React, {useCallback, useState} from 'react';
+import {Pressable} from 'react-native';
+import NaverMapView, {Marker} from 'react-native-nmap';
 import styled from 'styled-components';
 
-import FindIcon from '../../assets/icons/Map/find.svg';
+import {PAGE_NAME as AfterRecommendPage} from './components/RecommendMakers/AfterRecommend';
+import {MarkerMarkerIcon} from '../../assets';
+import CheckIcon from '../../assets/icons/BottomSheet/Checked.svg';
+import RecommendIcon from '../../assets/icons/Spot/recommend.svg';
 import Typography from '../../components/Typography';
-import {width, height} from '../../theme';
+import {
+  useCancelRecommend,
+  useGetRecommend,
+  useSendRecommend,
+} from '../../hook/useRecommendMakers';
+import {useGroupSpotList} from '../../hook/useSpot';
+import {userLocationAtom} from '../../utils/store';
 
+// latitude : 위도 (y) ,longitude :경도 (x)
 export const PAGE_NAME = 'RECOMMEND_MAKERS_MAP';
 const RecommendMakersMap = ({route}) => {
+  const paramsLocation = route?.params?.location;
+  const name = route?.params?.name;
+  const address = route?.params?.address;
+  const placeData = route?.params?.data;
+  const zipCode = route?.params?.zipCode;
+  const navigation = useNavigation();
+  const [zoom, setZoom] = useState(17);
+  const [initCenter, setInitCenter] = useAtom(userLocationAtom); // 기초 좌표 강남역
+  const [selectId, setSelectId] = useState(null);
+
+  const handleCameraChange = event => {
+    setZoom(event.zoom);
+  };
+  const {data: getRecommend, refetch} = useGetRecommend(Number(placeData.id));
+  const {data: userSpotList} = useGroupSpotList();
+  const {mutateAsync: sendRecommend} = useSendRecommend();
+  const {mutateAsync: cancelRecommend} = useCancelRecommend();
+  const listData = userSpotList.data.spotListResponseDtoList;
+
+  const resData = getRecommend?.data;
+  const spotListData = listData?.map(el => {
+    return {
+      clientName: el.clientName,
+      spots: el.spots,
+    };
+  });
+
+  const sendRecommendButton = async () => {
+    const reqData = {
+      kakaoStoreId: Number(placeData.id),
+      name: placeData.place_name,
+      phone: placeData.phone,
+      address: {
+        zipCode: zipCode,
+        address1: placeData.road_address_name,
+        address2: null,
+        address3: placeData.address_name,
+        latitude: placeData.y,
+        longitude: placeData.x,
+      },
+      spotId: selectId,
+    };
+
+    await sendRecommend(reqData);
+    navigation.navigate(AfterRecommendPage);
+  };
+
+  const cancelRecommendButton = async () => {
+    const data = {
+      kakaoStoreId: Number(placeData.id),
+      spotId: resData?.recommendSpotId,
+    };
+    await cancelRecommend(data);
+    setSelectId(null);
+  };
+  useFocusEffect(
+    useCallback(() => {
+      if (paramsLocation) {
+        setInitCenter(paramsLocation);
+      }
+
+      refetch();
+    }, [paramsLocation, refetch, setInitCenter]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      setZoom(17);
+    }, []),
+  );
+  console.log(selectId, resData?.recommendSpotId);
   return (
     <Wrap>
-      <KakaoMapView
-        markerImageUrl="https://github.com/jiggag/react-native-kakao-maps/blob/develop/example/custom_image.png?raw=true"
-        markerList={[
-          {
-            lat: 37.59523,
-            lng: 127.086,
-            markerName: 'marker',
-          },
-          {
-            lat: 37.59523,
-            lng: 127.08705,
-            markerName: 'marker2',
-          },
-        ]}
-        width={300}
-        height={500}
-        centerPoint={{
-          lat: 37.59523,
-          lng: 127.086,
-        }}
-        onChange={event => {
-          console.log('[onChange]', event.nativeEvent);
-        }}
-      />
+      <MapView>
+        <NaverMapView
+          minZoomLevel={17}
+          maxZoomLevel={17}
+          scaleBar={false}
+          zoomControl={false}
+          center={{...initCenter, zoom: zoom}}
+          style={{
+            width: '100%',
+            height: 128,
+            overflow: 'hidden',
+            borderRadius: 14,
+          }}
+          onCameraChange={handleCameraChange}>
+          <Marker
+            image={MarkerMarkerIcon}
+            coordinate={paramsLocation}
+            style={{width: 40, height: 40}}
+          />
+        </NaverMapView>
+      </MapView>
+      <InnerWrap>
+        <NameText>{name}</NameText>
+        <AddressText>{address + ' ' + name}</AddressText>
+        <RecommendCount>
+          <RecommendIcon />
+          <RecommendCountText>
+            {resData === null ? 0 : resData?.count}명
+          </RecommendCountText>
+        </RecommendCount>
+      </InnerWrap>
+      <Border />
+      <SpotListWrap>
+        <DeliverySpotText>배송 받을 스팟</DeliverySpotText>
+        <SpotListView>
+          {spotListData?.map(el =>
+            el.spots.map(v => (
+              <Pressable
+                onPress={() => setSelectId(v.spotId)}
+                key={v.spotId}
+                disabled={resData?.recommendSpotId}>
+                <SpotWrap>
+                  <SpotText>{el.clientName + ' ' + v.spotName}</SpotText>
+                  {(selectId === v.spotId ||
+                    resData?.recommendSpotId === v.spotId) && <CheckIcon />}
+                </SpotWrap>
+                <ThinBorder />
+              </Pressable>
+            )),
+          )}
+        </SpotListView>
+      </SpotListWrap>
+      <ButtonWrap>
+        {resData?.isRecommend ? (
+          <RecommendCancelButton onPress={() => cancelRecommendButton()}>
+            <RecommendButtonCancelText>추천 취소하기</RecommendButtonCancelText>
+          </RecommendCancelButton>
+        ) : (
+          <RecommendButton
+            disabled={selectId === null}
+            onPress={sendRecommendButton}
+            select={selectId}>
+            <RecommendButtonText select={selectId}>
+              추천하기
+            </RecommendButtonText>
+          </RecommendButton>
+        )}
+      </ButtonWrap>
     </Wrap>
   );
 };
 
 export default RecommendMakersMap;
 
-const MapView = styled.Pressable`
-  flex: 1;
+const MapView = styled.View`
+  padding: 24px;
 `;
-
-const Wrap = styled(GestureHandlerRootView)`
+const Wrap = styled.View`
   flex: 1;
   background-color: ${({theme}) => theme.colors.grey[0]};
 `;
 
-const Search = styled.View`
-  margin: 0px 24px;
-  background-color: ${({theme}) => theme.colors.grey[8]};
-  padding: 11px 14px 11px 28px;
-  border-radius: 8px;
-  height: 44px;
+const InnerWrap = styled.View`
+  padding: 0px 24px;
 `;
 
-const PlaceHolderText = styled(Typography).attrs({text: 'Body06R'})`
+const NameText = styled(Typography).attrs({text: 'Title03SB'})`
+  color: ${({theme}) => theme.colors.grey[2]};
+`;
+
+const AddressText = styled(Typography).attrs({text: 'Body06R'})`
   color: ${({theme}) => theme.colors.grey[4]};
 `;
-const Icon = styled(FindIcon)`
-  position: absolute;
-  bottom: 14px;
-  left: 32px;
-  z-index: 1;
-  margin-right: 4px;
+
+const DeliverySpotText = styled(Typography).attrs({text: 'Title04SB'})`
+  color: ${({theme}) => theme.colors.grey[2]};
+  padding: 0px 24px;
+  margin-bottom: 16px;
 `;
 
-const LocationButtonWrap = styled.View`
-  position: absolute;
-  bottom: ${({snap}) => (snap === 1 ? '35%' : '132px')};
-  right: 24px;
-  z-index: 99;
+const SpotText = styled(Typography).attrs({text: 'Body05R'})`
+  color: ${({theme}) => theme.colors.grey[2]};
+  margin: 24px 0px;
 `;
 
-const ListButtonWrap = styled.View`
-  z-index: 999;
-  position: absolute;
-  right: 24px;
-  bottom: 56px;
+const ThinBorder = styled.View`
+  background-color: #f5f5f5;
+  height: 1px;
 `;
 
-const ListButton = styled.Pressable`
-  background-color: ${({theme}) => theme.colors.grey[2]};
-  width: ${width * 116}px;
-  height: ${height * 56}px;
-  border-radius: 100px;
+const Border = styled.View`
+  background-color: ${({theme}) => theme.colors.grey[8]};
+  height: 6px;
+  margin: 24px 0px;
+`;
+
+const RecommendCount = styled.View`
+  display: flex;
   flex-direction: row;
-  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+`;
+
+const RecommendCountText = styled(Typography).attrs({text: 'Body06R'})`
+  color: ${({theme}) => theme.colors.grey[2]};
+  margin-left: 8px;
+`;
+
+const RecommendButton = styled.Pressable`
+  background-color: white;
+  border: 1px solid;
+  border-color: ${({select}) => (select ? '#BDBAC1' : '#e4e3e7')};
+  border-radius: 100px;
+  padding: 17px 0px;
+  align-items: center;
+  position: absolute;
+  bottom: 35px;
+  width: 100%;
+`;
+const RecommendButtonText = styled(Typography).attrs({text: 'BottomButtonSB'})`
+  color: ${({theme, select}) =>
+    select ? theme.colors.grey[2] : theme.colors.grey[6]};
+`;
+const RecommendButtonCancelText = styled(Typography).attrs({
+  text: 'BottomButtonR',
+})`
+  color: ${({theme}) => theme.colors.grey[4]};
+`;
+
+const SpotListView = styled.ScrollView`
+  padding: 0px 24px;
+`;
+
+const SpotListWrap = styled.View`
+  flex: 1;
+  margin-bottom: 90px;
+`;
+
+const ButtonWrap = styled.View`
+  margin: 0px 24px;
+`;
+
+const SpotWrap = styled.View`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
 `;
 
-const ListButtonText = styled(Typography).attrs({text: 'Button09SB'})`
-  color: ${({theme}) => theme.colors.grey[0]};
-  margin-left: 4px;
-`;
-
-const CategoryButton = styled(Shadow)`
-  border-radius: 50px;
-  width: ${width * 48}px;
-  height: ${height * 48}px;
-  background-color: white;
+const RecommendCancelButton = styled.Pressable`
+  position: absolute;
+  bottom: 44px;
+  width: 100%;
   align-items: center;
-  justify-content: center;
-`;
-const CategoryWrap = styled.Pressable`
-  position: absolute;
-  right: 24px;
-  top: 16px;
-  z-index: 99;
-`;
-
-const AddSpotButton = styled(Shadow)`
-  border-radius: 50px;
-  width: ${width * 56}px;
-  height: ${height * 56}px;
-  background-color: white;
-  padding: 13px 12px 14px 14px;
-`;
-const AddSpotWrap = styled.Pressable`
-  position: absolute;
-  left: 24px;
-  bottom: 56px;
-  z-index: 99;
-`;
-
-const BalloonWrapper = styled.View`
-  z-index: 99;
-  position: absolute;
-  left: 30px;
-  bottom: 130px;
 `;

@@ -393,6 +393,9 @@ import ShareSpotMap, {
 import SearchResult, {
   PAGE_NAME as MapSearchResult,
 } from '../../pages/Map/SearchResult';
+import RecommendMakersSearchResult, {
+  PAGE_NAME as RecommendMakersSearchResultPage,
+} from '../../pages/Map/components/RecommendMakers/SearchResult';
 import MySpotDetail, {
   PAGE_NAME as MySpotDetailPage,
 } from '../../pages/Spots/mySpot/DetailAddress';
@@ -423,6 +426,9 @@ import InviteSpot, {
 import MySpotDelivery, {
   PAGE_NAME as MySpotDeliveryPage,
 } from '../../pages/Spots/mySpot/Delivery';
+import AfterRecommend, {
+  PAGE_NAME as AfterRecommendPage,
+} from '../../pages/Map/components/RecommendMakers/AfterRecommend';
 
 import NicknamePage, {
   PAGE_NAME as NicknamePageName,
@@ -2613,6 +2619,22 @@ const Screen = () => {
           }}
         />
         <MainRoot.Screen
+          name={AfterRecommendPage}
+          component={AfterRecommend}
+          options={{
+            headerBackVisible: false,
+            headerShown: true,
+            headerShadowVisible: false,
+            title: '맛집 추천하기',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+          }}
+        />
+        <MainRoot.Screen
           name={ShareSpotListPage}
           component={ShareSpotList}
           options={{
@@ -2638,6 +2660,23 @@ const Screen = () => {
             headerShadowVisible: false,
             //headerTransparent: true,
             // title: '주소 검색',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+          }}
+        />
+        <MainRoot.Screen
+          name={RecommendMakersSearchResultPage}
+          component={RecommendMakersSearchResult}
+          options={{
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+            headerShown: true,
+            headerShadowVisible: false,
+            //headerTransparent: true,
+            title: '주소 검색',
             headerTitleAlign: 'center',
             headerTitleStyle: {
               fontFamily: 'Pretendard-SemiBold',

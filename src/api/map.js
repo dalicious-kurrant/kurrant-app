@@ -103,23 +103,26 @@ export const mapApis = {
 
     return addrResult.documents;
   },
-  getMakersAddress: async (longitude, latitude) => {
-    const baseLocation = {latitude: latitude, longitude: longitude};
 
-    const apiUrl = `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`;
+  getMakersAddress: async query => {
+    const lat = 37.49703;
+    const lng = 127.028191;
+    const sort = 'accuracy';
 
-    const apiRes = await fetch(apiUrl, {
+    const apiUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${query}&x=${lat}&y=${lng}&sort=${sort}&category_group_code=FD6`;
+
+    const res = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         Authorization: `KakaoAK ${kakaoKey}`,
       },
     });
-    const apiResult = await apiRes.json();
-    const query = apiResult?.documents[0]?.address?.address_name;
+    const result = await res.json();
 
-    //return result;
-
-    const addrApiUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${query}&x=${longitude}&y=${latitude}&category_group_code=FD6&sort=distance`;
+    if (result.documents.length > 0) {
+      return result.documents;
+    }
+    const addrApiUrl = `https://dapi.kakao.com/v2/local/search/address.json?query=${query}&x=${lat}&y=${lng}&sort=${sort}`;
 
     const addrRes = await fetch(addrApiUrl, {
       method: 'GET',
@@ -128,20 +131,7 @@ export const mapApis = {
       },
     });
     const addrResult = await addrRes.json();
-    console.log(addrResult, '11');
-    const test = addrResult.documents.map(x => {
-      return {
-        longitude: x.x,
-        latitude: x.y,
-      };
-    });
 
-    const closestLocation = findClosestCoordinate(test, baseLocation);
-    console.log(closestLocation, 'rkRKdns');
-    if (closestLocation !== null) {
-      console.log('가장 가까운 위치 정보:', closestLocation);
-    } else {
-      console.log('배열이 비어있습니다.');
-    }
+    return addrResult.documents;
   },
 };

@@ -1261,8 +1261,6 @@ PODS:
     - React-jsi (= 0.70.1)
     - React-logger (= 0.70.1)
     - React-perflogger (= 0.70.1)
-  - ReactNativeKakaoMaps (0.0.10):
-    - React
   - RecaptchaInterop (100.0.0)
   - rn-fetch-blob (0.13.0-beta.2):
     - React-Core
@@ -1413,7 +1411,6 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - "ReactNativeKakaoMaps (from `../node_modules/@jiggag/react-native-kakao-maps`)"
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
@@ -1591,8 +1588,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativeKakaoMaps:
-    :path: "../node_modules/@jiggag/react-native-kakao-maps"
   rn-fetch-blob:
     :path: "../node_modules/rn-fetch-blob"
   RNAppleAuthentication:
@@ -1732,7 +1727,6 @@ SPEC CHECKSUMS:
   React-RCTVibration: e9164827303fb6a5cf79e4c4af4846a09956b11f
   React-runtimeexecutor: a11d0c2e14140baf1e449264ca9168ae9ae6bbd0
   ReactCommon: 7f86326b92009925c6dcf93f8e825060171c379f
-  ReactNativeKakaoMaps: e82e667223510e9585d7268862ba48e2e8749a25
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   rn-fetch-blob: d469adb2e1d17f9d02ceb2b7bdd35ae5bd5db66b
   RNAppleAuthentication: 0571c08da8c327ae2afc0261b48b4a515b0286a6

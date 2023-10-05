@@ -49,6 +49,7 @@ export const DisabledPrivateSpot = require('../assets/images/spot/disabledPrivat
 export const CloseButton = require('../assets/images/spot/close.png');
 export const NotDeliveryIcon = require('../assets/images/spot/notDelivery.png');
 export const MarkerIcon = require('../assets/images/map/marker.png');
+export const MarkerMarkerIcon = require('../assets/images/map/makersMarker.png');
 export const SpotIcon = require('../assets/images/map/spot.png');
 export const ShareSpotMarker = require('../assets/images/map/shareSpotMarker.png');
 export const SpotNameIcon = require('../assets/images/map/spotName.png');

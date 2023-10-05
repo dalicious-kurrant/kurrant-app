@@ -110,6 +110,7 @@
 		B00511192930A11C0035F28D /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		B065B1B92ABBDBEB005FCBE3 /* hermes.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = hermes.xcframework; path = "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework"; sourceTree = "<group>"; };
 		B068103A2966B4E700A4D3AB /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "kurrant/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		B0BAC59D2AC10E46004AD832 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		BB88AAD1C21847FB868A3C00 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-ExtraBold.otf"; path = "../src/assets/fonts/Pretendard/Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
 		C0A217AEDFE0481FB9F3985D /* Pretendard-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Light.otf"; path = "../src/assets/fonts/Pretendard/Pretendard-Light.otf"; sourceTree = "<group>"; };
 		D35B52932963C45A00368C90 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -232,6 +233,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B0BAC59D2AC10E46004AD832 /* libsqlite3.tbd */,
 				B065B1B92ABBDBEB005FCBE3 /* hermes.xcframework */,
 				2ABB8D9D2A1B4C3A00E8AD46 /* RNPermissions.framework */,
 				2ABB8D9B2A1B4A2200E8AD46 /* Permission_Notifications.framework */,

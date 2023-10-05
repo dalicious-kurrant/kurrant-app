@@ -71,7 +71,7 @@ import SseRedDot from '../../../../../utils/sse/SseService/SseRedDot/SseRedDot';
 import {mainDimAtom} from '../../../../../utils/store';
 import {PAGE_NAME as ApartRegisterSpotPageName} from '../../../../Group/GroupApartment/SearchApartment/AddApartment/DetailAddress';
 import {PAGE_NAME as GroupManagePageName} from '../../../../Group/GroupManage/SpotManagePage';
-import {PAGE_NAME as RecommendMakersMapPageName} from '../../../../Map/RecommendMakersMap';
+import {PAGE_NAME as RecommendMakersMapPageName} from '../../../../Map/components/RecommendMakers/SearchResult';
 import {PAGE_NAME as MembershipInfoPageName} from '../../../../Membership/MembershipInfo';
 import {PAGE_NAME as MembershipIntro} from '../../../../Membership/MembershipIntro';
 import {PAGE_NAME as NotificationCenterName} from '../../../../NotificationCenter';
@@ -712,6 +712,17 @@ const Pages = () => {
               })}
             </>
           )}
+          {/* 메이커스 추천 */}
+          <MakerRecommendView
+            onPress={() => navigation.navigate(RecommendMakersMapPageName)}>
+            <MakersRecommendInnerView>
+              <RecommendText>내가 아는 맛집</RecommendText>
+              <RecommendBoldText>
+                <RecommendBoldText bold>메이커스</RecommendBoldText>로 추천하기
+              </RecommendBoldText>
+            </MakersRecommendInnerView>
+            <MakerRecommendIcon />
+          </MakerRecommendView>
         </MainWrap>
 
         <Wrap>
@@ -811,18 +822,7 @@ const Pages = () => {
                 </MembershipText>
               </MenbershipBanner>
             )}
-            {/* 메이커스 추천 */}
-            <MakerRecommendView
-              onPress={() => navigation.navigate(RecommendMakersMapPageName)}>
-              <MakersRecommendInnerView>
-                <RecommendText>내가 아는 맛집</RecommendText>
-                <RecommendBoldText>
-                  <RecommendBoldText bold>메이커스</RecommendBoldText>로
-                  추천하기
-                </RecommendBoldText>
-              </MakersRecommendInnerView>
-              <MakerRecommendIcon />
-            </MakerRecommendView>
+
             {/* 아래주석 마켓 추가시 사용 */}
             {/* <MarketWrap>
             <Market>
@@ -1218,6 +1218,7 @@ const MakerRecommendView = styled.Pressable`
   flex-direction: row;
   justify-content: space-between;
   padding: 0px 16px;
+  margin-bottom: 16px;
 `;
 
 const MakersRecommendInnerView = styled.View`
