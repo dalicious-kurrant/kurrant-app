@@ -44,6 +44,7 @@ const RecommendMakersMap = ({route}) => {
   const spotListData = listData?.map(el => {
     return {
       clientName: el.clientName,
+      clientId: el.clientId,
       spots: el.spots,
     };
   });
@@ -129,21 +130,22 @@ const RecommendMakersMap = ({route}) => {
       <SpotListWrap>
         <DeliverySpotText>배송 받을 스팟</DeliverySpotText>
         <SpotListView>
-          {spotListData?.map(el =>
-            el?.spots?.map(v => (
+          {spotListData?.map(el => {
+            const spotName = el.spots.map(v => v.spotName);
+            return (
               <Pressable
-                onPress={() => setSelectId(v.spotId)}
-                key={v.spotId}
+                onPress={() => setSelectId(el.clientId)}
+                key={el.clientId}
                 disabled={resData?.recommendSpotId !== undefined}>
                 <SpotWrap>
-                  <SpotText>{el.clientName + ' ' + v.spotName}</SpotText>
-                  {(selectId === v.spotId ||
-                    resData?.recommendSpotId === v.spotId) && <CheckIcon />}
+                  <SpotText>{el.clientName ?? spotName}</SpotText>
+                  {(selectId === el.clientId ||
+                    resData?.recommendSpotId === el.clientId) && <CheckIcon />}
                 </SpotWrap>
                 <ThinBorder />
               </Pressable>
-            )),
-          )}
+            );
+          })}
         </SpotListView>
       </SpotListWrap>
       <ButtonWrap>
