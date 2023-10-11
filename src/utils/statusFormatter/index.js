@@ -169,12 +169,12 @@ export function formattedLogin(data) {
 
 export const cardListData = [
   {id: '01', text: '비씨', value: '01'},
-  // {id: '02', text: '국민', value: '02'},
-  // {id: '03', text: '하나', value: '03'},
+  {id: '02', text: '국민', value: '02'},
+  {id: '03', text: '하나', value: '03'},
   {id: '04', text: '삼성', value: '04'},
   {id: '06', text: '신한', value: '06'},
   {id: '07', text: '현대드', value: '07'},
-  // {id: '08', text: '롯데', value: '08'},
+  {id: '08', text: '롯데', value: '08'},
   {id: '11', text: '시티', value: '11'},
   {id: '12', text: 'NH농협', value: '12'},
   {id: '13', text: '수협', value: '13'},
