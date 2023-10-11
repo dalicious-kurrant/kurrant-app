@@ -1,6 +1,7 @@
 import EventSource from 'react-native-sse';
-import Base64 from '../sseLogics/base64Converter';
+
 import {Fetch} from '../../../biz/useAuth';
+import Base64 from '../sseLogics/base64Converter';
 
 let SseServiceOnlyOneInstance;
 

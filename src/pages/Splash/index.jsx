@@ -7,6 +7,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, Animated, AppState, Linking, Platform, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {requestNotifications, RESULTS} from 'react-native-permissions';
+import PushNotification from 'react-native-push-notification';
 import VersionCheck from 'react-native-version-check';
 import styled from 'styled-components/native';
 
@@ -274,25 +275,25 @@ const Page = () => {
       }
     };
     async function requestUserPermission() {
-      const fcmToken = await messaging().getToken();
-      console.log(fcmToken, 'fcmToken');
-      if (fcmToken) {
-        await messaging().deleteToken();
-      }
       const authStatus = await messaging().hasPermission();
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
       if (enabled) {
         console.log('Authorization status:', authStatus);
-
         if (Platform.OS === 'ios') {
           // ios의 경우 필수가 아니라고도 하고 필수라고도 하고.. 그냥 넣어버렸다.
           await messaging().registerDeviceForRemoteMessages();
         }
 
+        const fcmTokens = await messaging().getToken();
+        // if (fcmTokens) {
+        //   await messaging().deleteToken();
+        // }
+
+        console.log(fcmTokens, 'fcmToken');
         console.log('test');
-        messaging().onTokenRefresh(onTokenRefreshHandler);
+        // messaging().onTokenRefresh(onTokenRefreshHandler);
       }
     }
 
@@ -323,8 +324,10 @@ const Page = () => {
     };
 
     // 알림 권한 요청 함수 호출
-    requestUserPermission();
+    // Request permissions for remote notifications
+    PushNotification.requestPermissions();
     requestNotificationPermission();
+    requestUserPermission();
   }, []);
   return (
     <Container>

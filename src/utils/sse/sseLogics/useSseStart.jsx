@@ -1,11 +1,11 @@
+import {useAtom} from 'jotai';
 import {useCallback, useEffect, useMemo} from 'react';
-import {getStorage} from '../../asyncStorage';
+import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
 import Config from 'react-native-config';
 
-import SseService from '../SseService/SseService';
 import * as sseAtoms from './store';
-import {useAtom} from 'jotai';
-import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter';
+import {getStorage} from '../../asyncStorage';
+import SseService from '../SseService/SseService';
 
 const apiHostUrl =
   Config.NODE_ENV === 'dev'
@@ -16,7 +16,7 @@ const apiHostUrl =
 
 let forOnlyOneSseService;
 
-const useSseStart = () => {
+const useSseStart = isToken => {
   const [sseType1, setSseType1] = useAtom(sseAtoms.sseType1Atom);
   const [sseType2, setSseType2] = useAtom(sseAtoms.sseType2Atom);
   const [sseType3, setSseType3] = useAtom(sseAtoms.sseType3Atom);
@@ -46,7 +46,7 @@ const useSseStart = () => {
   };
 
   useEffect(() => {
-    if (!!sseResetHandler) {
+    if (sseResetHandler) {
       sseResetHandler.addListener('reset-sse-instance', () => {
         resetSseInstance();
       });
@@ -56,7 +56,6 @@ const useSseStart = () => {
   const getSseServiceInstance = useCallback(
     async resetSse => {
       const tokenYo = await getToken();
-
       if (forOnlyOneSseService) return forOnlyOneSseService; // 이미 인스턴스가 만들어졌으면 다시 만들지 않는다
 
       if (!tokenYo) return;
@@ -103,13 +102,13 @@ const useSseStart = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      getSseServiceInstance(false);
+      if (isToken) getSseServiceInstance(false);
     }, 500);
-  }, []);
+  }, [getSseServiceInstance, isToken]);
 
   useEffect(() => {
     return () => {
-      if (!!forOnlyOneSseService) {
+      if (forOnlyOneSseService) {
         forOnlyOneSseService.onClose();
       }
     };

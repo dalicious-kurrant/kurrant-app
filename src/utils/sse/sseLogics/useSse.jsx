@@ -1,8 +1,9 @@
-import * as sseAtoms from './store';
 import {useAtom} from 'jotai';
-import {useQuery, useMutation} from 'react-query';
-import {fetchJson} from '../../fetch';
 import {useEffect} from 'react';
+import {useQuery, useMutation} from 'react-query';
+
+import * as sseAtoms from './store';
+import {fetchJson} from '../../fetch';
 
 const useSse = () => {
   const [sseType1, setSseType1] = useAtom(sseAtoms.sseType1Atom);
