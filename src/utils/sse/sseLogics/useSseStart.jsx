@@ -16,7 +16,7 @@ const apiHostUrl =
 
 let forOnlyOneSseService;
 
-const useSseStart = () => {
+const useSseStart = isToken => {
   const [sseType1, setSseType1] = useAtom(sseAtoms.sseType1Atom);
   const [sseType2, setSseType2] = useAtom(sseAtoms.sseType2Atom);
   const [sseType3, setSseType3] = useAtom(sseAtoms.sseType3Atom);
@@ -56,7 +56,6 @@ const useSseStart = () => {
   const getSseServiceInstance = useCallback(
     async resetSse => {
       const tokenYo = await getToken();
-
       if (forOnlyOneSseService) return forOnlyOneSseService; // 이미 인스턴스가 만들어졌으면 다시 만들지 않는다
 
       if (!tokenYo) return;
@@ -103,9 +102,9 @@ const useSseStart = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      getSseServiceInstance(false);
+      if (isToken) getSseServiceInstance(false);
     }, 500);
-  }, []);
+  }, [getSseServiceInstance, isToken]);
 
   useEffect(() => {
     return () => {

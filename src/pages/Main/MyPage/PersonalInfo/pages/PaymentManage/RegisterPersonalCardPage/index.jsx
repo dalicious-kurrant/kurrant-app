@@ -2,10 +2,18 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import cardValidator from 'card-validator';
 import React, {useCallback, useEffect, useState} from 'react';
 import {FormProvider, useForm} from 'react-hook-form';
-import {Platform, ScrollView, NativeModules, Dimensions} from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  NativeModules,
+  Dimensions,
+  Alert,
+} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import styled, {useTheme} from 'styled-components/native';
+import Arrow from '~assets/icons/Group/arrowDown.svg';
+import BottomSheetSelect from '~components/BottomSheetSelect';
 import Button from '~components/Button';
 import RefTextInput from '~components/RefTextInput';
 import Typography from '~components/Typography';
@@ -15,6 +23,7 @@ import useKeyboardEvent from '~hook/useKeyboardEvent';
 import {PAGE_NAME as PaymentManagePage} from '..';
 import useUserMe from '../../../../../../../biz/useUserMe';
 import {isValidCardNumber} from '../../../../../../../utils/cardFormatter';
+import {cardListData} from '../../../../../../../utils/statusFormatter';
 import {PAGE_NAME as PayCheckPasswordPageName} from '../../PayCheckPassword';
 const screenHeight = Dimensions.get('window').height;
 
@@ -39,6 +48,7 @@ const Pages = ({route}) => {
     payCheckPassword,
     readableAtom: {cardList},
   } = useUserMe();
+  const [selectDefault, setSelectDefault] = useState('');
   const card = form.watch('cardNumber');
   const {
     formState: {errors},
@@ -46,17 +56,28 @@ const Pages = ({route}) => {
     watch,
   } = form;
   const navigation = useNavigation();
+  const onSelectEvent = async id => {
+    console.log(id);
+    setSelectDefault(id);
+  };
+  const onSelectOpenModal = () => {
+    console.log(selectDefault);
+    setModalVisible(true);
+  };
   const onSubmit = async data => {
     const paycheck = await payCheckPassword();
     const exp = data.cardExpDate.split('/');
     const reqNice = {
       cardNumber: data.cardNumber?.replace(/\W/gi, ''),
+      corporationCode: cardListData.find(v => v.id === selectDefault).value,
       expirationYear: exp[1],
       expirationMonth: exp[0],
       cardPassword: data.cardPass,
       identityNumber: data.cardBirthDay.substring(2),
+      cardType: '01',
       defaultType: cardList.length > 0 ? 0 : params?.defaultType || 0,
     };
+    console.log(reqNice, 'reqNice');
     navigation.navigate(PayCheckPasswordPageName, {
       isFirst: !paycheck.data,
       cardData: JSON.stringify(reqNice),
@@ -142,6 +163,20 @@ const Pages = ({route}) => {
                   카드 정보
                 </Typography>
               </RegisteredTitleBox>
+              <DefaultCardBox>
+                <Typography text="Body06R" textColor={themeApp.colors.grey[4]}>
+                  카드사
+                </Typography>
+                <SpotView onPress={onSelectOpenModal}>
+                  <SpotName>
+                    {cardListData.find(v => v.id === selectDefault)
+                      ? cardListData.find(v => v.id === selectDefault).text
+                      : '선택'}
+                  </SpotName>
+                  <Arrow />
+                </SpotView>
+              </DefaultCardBox>
+
               <RegiteredView>
                 <RefTextInput
                   label="카드번호"
@@ -231,10 +266,10 @@ const Pages = ({route}) => {
                   // value={isApplicant.phone}
                   rules={{
                     required: '필수 입력 항목 입니다.',
-                    maxLength: {
-                      value: 2,
-                      message: '올바른 비밀번호를 입력해주세요',
-                    },
+                    // maxLength: {
+                    //   value: 2,
+                    //   message: '올바른 비밀번호를 입력해주세요',
+                    // },
                   }}
                 />
               </RegiteredView>
@@ -252,6 +287,15 @@ const Pages = ({route}) => {
           </ButtonBox>
         )}
       </Wrapper>
+      <BottomSheetSelect
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        title="카드사"
+        data={cardListData}
+        selected={selectDefault}
+        setSelected={setSelectDefault}
+        firstSnap={'50%'}
+      />
     </KeyboardAwareScrollView>
   );
 };
@@ -275,4 +319,20 @@ const ButtonBox = styled.View`
   margin-bottom: ${({isKeyboard}) => (isKeyboard ? '100px' : '24px')};
   background-color: ${({isKeyboard}) =>
     isKeyboard ? 'rgba(0,0,0,1)' : 'white'};
+`;
+
+const DefaultCardBox = styled.View``;
+
+const SpotView = styled.Pressable`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 24px;
+  border: 1px solid ${({theme}) => theme.colors.grey[7]};
+  border-radius: 14px;
+  width: 100%;
+  margin-top: 8px;
+`;
+const SpotName = styled(Typography).attrs({text: 'Body05R'})`
+  color: ${({theme}) => theme.colors.grey[2]};
 `;
