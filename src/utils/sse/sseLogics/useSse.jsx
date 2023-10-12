@@ -1,8 +1,9 @@
-import * as sseAtoms from './store';
 import {useAtom} from 'jotai';
-import {useQuery, useMutation} from 'react-query';
-import {fetchJson} from '../../fetch';
 import {useEffect} from 'react';
+import {useQuery, useMutation} from 'react-query';
+
+import * as sseAtoms from './store';
+import {fetchJson} from '../../fetch';
 
 const useSse = () => {
   const [sseType1, setSseType1] = useAtom(sseAtoms.sseType1Atom);
@@ -47,55 +48,55 @@ const useSse = () => {
         switch (messageType) {
           case 1:
             // type: 1 전체공지 (구현중)
-            console.log('sse 알림읽기 성공 message type 1 (전체공지)');
+            //console.log('sse 알림읽기 성공 message type 1 (전체공지)');
             setSseType1({});
             sseHistoryRefetch();
             break;
           case 2:
             // type: 2 스팟공지 (프론트 구현중)
-            console.log('sse 알림읽기 성공 message type 2 (스팟공지)');
+            //console.log('sse 알림읽기 성공 message type 2 (스팟공지)');
             setSseType2({});
             sseHistoryRefetch();
             break;
           case 3:
             // type: 3 구매후기 (완료)
-            console.log('sse 알림읽기 성공 message type 3 (구매후기)');
+            //console.log('sse 알림읽기 성공 message type 3 (구매후기)');
             setSseType3({});
             sseHistoryRefetch();
 
             break;
           case 4:
             // type: 4 마감시간
-            console.log('sse 알림읽기 성공 message type 4 (마감시간)');
+            //console.log('sse 알림읽기 성공 message type 4 (마감시간)');
             setSseType4({});
             sseHistoryRefetch();
             break;
           case 5:
             // type: 5 다음주 식사 구매하셨나요? (완료)
-            console.log(
-              'sse 알림읽기 성공 message type 5 (다음주 식사 구매하셨나요?)',
-            );
+            // console.log(
+            //   'sse 알림읽기 성공 message type 5 (다음주 식사 구매하셨나요?)',
+            // );
 
             setSseType5({});
             sseHistoryRefetch();
             break;
           case 6:
             // type: 6 알림관련 (완료)
-            console.log('sse 알림읽기 성공 message type 6 (알림관련)');
+            //console.log('sse 알림읽기 성공 message type 6 (알림관련)');
 
             setSseType6({});
             sseHistoryRefetch();
             break;
           case 7:
             // type: 7 그룹 스팟공지 (완료)
-            console.log('sse 알림읽기 성공 message type 7 (그룹)');
+            //console.log('sse 알림읽기 성공 message type 7 (그룹)');
 
             setSseType7({});
             sseHistoryRefetch();
             break;
           case 8:
             // type: 8 댓글 (완료)
-            console.log('sse 알림읽기 성공 message type 8 (댓글)');
+            //console.log('sse 알림읽기 성공 message type 8 (댓글)');
 
             setSseType8({});
             sseHistoryRefetch();
@@ -105,8 +106,8 @@ const useSse = () => {
         }
       },
       onError: err => {
-        console.log('confirmSseIsRead(sse읽음확인 api)에 error가 났습니다');
-        console.log(err);
+        // console.log('confirmSseIsRead(sse읽음확인 api)에 error가 났습니다');
+        // console.log(err);
       },
     },
   );

@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {Shadow} from 'react-native-shadow-2';
@@ -7,18 +7,23 @@ import Sound from 'react-native-sound';
 import {useQueryClient} from 'react-query';
 import styled, {css} from 'styled-components';
 
+import QRCodeComponent from '../../../../../../components/QRCode/QRCode';
 import Typography from '../../../../../../components/Typography';
 import {useConfirmOrderState} from '../../../../../../hook/useOrder';
 // import {PAGE_NAME as reviewPage} from '../../../../../../screens/Main/Review/CreateReview/Page1';
 import {PAGE_NAME as CreateReviewPage1PageName} from '../../../../../../pages/Main/MyPage/Review/CreateReview/Page1';
+import useSse from '../../../../../../utils/sse/sseLogics/useSse';
 import {formattedMealFoodStatus} from '../../../../../../utils/statusFormatter';
 import useDietRepoMutation from '../../../DietRepo/useDietRepoMutation';
 import useGetDietRepo from '../../../DietRepo/useGetDietRepo';
 import {PAGE_NAME as MealMainPageName} from '../../../Meal/Main';
 import CoinAnimation from '../../components/CoinAnimation';
-import useSse from '../../../../../../utils/sse/sseLogics/useSse';
 
 const MealInfoComponent = ({
+  orderItemId,
+  qrOpen,
+  setQrOpen,
+  isEatIn,
   m,
   meal,
   mockStatus,
@@ -26,6 +31,7 @@ const MealInfoComponent = ({
   loadCoinSound,
   coinSound,
 }) => {
+  const [orderId, setOrderId] = useState(null);
   const [deliveryConfirmed, setDeliveryConfirmed] = useState(false);
   const navigation = useNavigation();
   // const {dietRepoMainRefetch} = useGetDietRepo();
@@ -111,44 +117,59 @@ const MealInfoComponent = ({
             </MealInfo>
           </MealInfoWrap>
         </Shadow>
-        {(meal.orderStatus === 10 || meal.orderStatus === 11) && (
+        {/* ToDo : test 끝나면 주석 다 풀어 */}
+        {/* (meal.orderStatus === 10 || meal.orderStatus === 11) && */}
+        {
           <OrderStatusWrap>
             <CommentText>
-              {meal.orderStatus === 11
-                ? '식사 맛있게 하셨나요?'
-                : meal.orderStatus === 10 &&
-                  '배송완료! 메뉴 확인후 수령하셨나요?'}
+              {
+                // !isEatIn && meal.orderStatus === 11
+                //   ? '식사 맛있게 하셨나요?'
+                //   : !isEatIn && meal.orderStatus === 10
+                //   ? '배송완료! 메뉴 확인후 수령하셨나요?'
+                //   :
+                isEatIn && '수령받을 식사를 스캔해주세요!'
+              }
             </CommentText>
 
             <ConfirmPressable
               disabled={startAni}
               startAni={startAni}
               onPress={() => {
-                if (meal.orderStatus === 10) {
-                  setStartAni(true);
-                  deliveryConfirmPress();
-                  addMeal([
-                    {dailyFoodId},
-                    () => {
-                      queryClient.invalidateQueries({
-                        queryKey: ['dietRepo', 'main'],
-                      });
-                      queryClient.invalidateQueries('userInfo');
+                // if (!isEatIn && meal.orderStatus === 10) {
+                //   setStartAni(true);
+                //   deliveryConfirmPress();
+                //   addMeal([
+                //     {dailyFoodId},
+                //     () => {
+                //       queryClient.invalidateQueries({
+                //         queryKey: ['dietRepo', 'main'],
+                //       });
+                //       queryClient.invalidateQueries('userInfo');
 
-                      // sseType3 : 홈에서 '배송완료! 메뉴 확인후... '누르면 refetch하게 하기
-                      sseHistoryRefetch();
+                //       // sseType3 : 홈에서 '배송완료! 메뉴 확인후... '누르면 refetch하게 하기
+                //       sseHistoryRefetch();
 
-                      // dietRepoMainRefetch();
-                    },
-                  ]);
+                //       // dietRepoMainRefetch();
+                //     },
+                //   ]);
+                // }
+                if (isEatIn) {
+                  setOrderId(meal.id);
+                  setQrOpen(true);
                 } else {
                   goToReviewPage(meal.id, meal.image, meal.name);
                 }
               }}>
               <ConfirmText>
-                {meal.orderStatus === 11
-                  ? '맛 평가하기'
-                  : meal.orderStatus === 10 && '네, 확인했어요'}
+                {
+                  // !isEatIn && meal.orderStatus === 11
+                  //   ? '맛 평가하기'
+                  //   : !isEatIn && meal.orderStatus === 10
+                  //   ? '네, 확인했어요'
+                  //   :
+                  isEatIn && '식사 스캔하기'
+                }
               </ConfirmText>
               {startAni && (
                 <CoinAnimation
@@ -160,6 +181,14 @@ const MealInfoComponent = ({
               )}
             </ConfirmPressable>
           </OrderStatusWrap>
+        }
+        {orderId && (
+          <QRCodeComponent
+            modal={qrOpen}
+            setModal={setQrOpen}
+            orderId={orderId}
+            setOrderId={setOrderId}
+          />
         )}
       </MealInfoWrapper>
     </>

@@ -678,17 +678,21 @@ const Pages = () => {
           ) : (
             <>
               {/* qr */}
-              {/* {!orderMealListIsFetching && orderMealList?.data && (
-                <>
-                  <QRCodeComponent modal={qrOpen} setModal={setQrOpen} />
-                  <QRView>
+
+              <>
+                {/* <QRCodeComponent
+                  modal={qrOpen}
+                  setModal={setQrOpen}
+                  data={orderMealList?.data}
+                /> */}
+                {/* <QRView>
                     <QRText>오늘의 식사를 스캔해주세요</QRText>
                     <Pressable onPress={() => setQrOpen(true)}>
                       <QRIcon />
                     </Pressable>
-                  </QRView>
-                </>
-              )} */}
+                  </QRView> */}
+              </>
+
               {orderMealList?.data?.map((m, idx) => {
                 if (m.serviceDate === date)
                   return (
@@ -696,6 +700,9 @@ const Pages = () => {
                       {m.orderItemDtoList.map(meal => {
                         return (
                           <MealInfoComponent
+                            qrOpen={qrOpen}
+                            setQrOpen={setQrOpen}
+                            isEatIn={meal.isEatIn}
                             m={m}
                             meal={meal}
                             loadCoinSound={loadCoinSound}

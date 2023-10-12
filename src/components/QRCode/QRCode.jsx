@@ -1,48 +1,44 @@
 import React, {useEffect, useState} from 'react';
-import {Modal, View} from 'react-native';
+import {Modal, View, ActivityIndicator} from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import styled from 'styled-components';
 
 import RestartIcon from '../../assets/icons/Home/restart.svg';
 import XIcon from '../../assets/icons/Home/x.svg';
+import {useGetQR} from '../../hook/useQr';
 import {formattedTimer} from '../../utils/dateFormatter';
 import Typography from '../Typography';
 
-const QRCodeComponent = ({modal, setModal}) => {
+const QRCodeComponent = ({modal, setModal, orderId, setOrderId}) => {
+  const [click, setClick] = useState(false);
   const [isQRCodeEnabled, setIsQRCodeEnabled] = useState(true);
   const [timer, setTimer] = useState(180);
   const [intervalId, setIntervalId] = useState(null);
+  const {data: qrData, refetch, isFetching} = useGetQR(orderId, modal);
 
-  const value = {
-    id: 4,
-    a: '22',
-    b: 2,
-    c: 'dd',
-  };
-
-  const jsonString = JSON.stringify(value);
+  const jsonString = JSON.stringify(qrData?.data);
 
   const reloadQRCode = () => {
     setIsQRCodeEnabled(true);
     setTimer(180);
     startTimer();
+    setClick(true);
   };
 
   const startTimer = () => {
-    if (intervalId === null) {
-      // 중복 실행 방지
-      const id = setInterval(() => {
-        setTimer(prevTimer => {
-          if (prevTimer <= 0) {
-            setIsQRCodeEnabled(false);
-            clearInterval(id);
-            return 0;
-          }
-          return prevTimer - 1;
-        });
-      }, 1000);
-      setIntervalId(id); // 인터벌 ID 저장
-    }
+    let id = setInterval(() => {
+      setTimer(prevTimer => {
+        if (prevTimer <= 0) {
+          setIsQRCodeEnabled(false);
+          clearInterval(id);
+          setClick(false);
+
+          return 0;
+        }
+        return prevTimer - 1;
+      });
+    }, 1000);
+    setIntervalId(id);
   };
 
   useEffect(() => {
@@ -52,18 +48,20 @@ const QRCodeComponent = ({modal, setModal}) => {
       startTimer();
     } else {
       setIsQRCodeEnabled(false);
-      if (intervalId !== null) {
-        clearInterval(intervalId); // 모달이 닫힐 때 인터벌 클리어
-        setIntervalId(null); // 인터벌 ID 초기화
-      }
+      clearInterval(intervalId);
+      setOrderId(null);
     }
 
     return () => {
-      if (intervalId !== null) {
-        clearInterval(intervalId); // 컴포넌트 언마운트 시 인터벌 클리어
-      }
+      clearInterval(intervalId);
     };
-  }, [modal, intervalId]);
+  }, [modal]);
+
+  useEffect(() => {
+    if (orderId && click) {
+      refetch();
+    }
+  }, [refetch, orderId, click]);
 
   return (
     <View>
@@ -74,12 +72,16 @@ const QRCodeComponent = ({modal, setModal}) => {
               <XIcon />
             </CloseButton>
             <QRView>
-              <QRCode
-                color={isQRCodeEnabled ? '#1D1C21' : '#F2F2F2'}
-                value={jsonString}
-                size={196}
-                logoBackgroundColor="transparent"
-              />
+              {isFetching ? (
+                <ActivityIndicator size={'large'} style={{flex: 1}} />
+              ) : (
+                <QRCode
+                  color={isQRCodeEnabled ? '#1D1C21' : '#F2F2F2'}
+                  value={jsonString}
+                  size={196}
+                  logoBackgroundColor="transparent"
+                />
+              )}
               {!isQRCodeEnabled && (
                 <ReStartView onPress={reloadQRCode}>
                   <RestartIcon />
@@ -87,7 +89,7 @@ const QRCodeComponent = ({modal, setModal}) => {
               )}
             </QRView>
             <TimeView>
-              {isQRCodeEnabled ? (
+              {isFetching ? null : isQRCodeEnabled ? (
                 <TimerText>{formattedTimer(timer)}</TimerText>
               ) : (
                 <DisabledTimerText>
@@ -138,6 +140,8 @@ const TimeView = styled.View`
 
 const TimerText = styled(Typography).attrs({text: 'CaptionR'})`
   color: ${({theme}) => theme.colors.blue[500]};
+  width: 50px;
+  text-align: center;
 `;
 
 const DisabledTimerText = styled(Typography).attrs({text: 'CaptionR'})`

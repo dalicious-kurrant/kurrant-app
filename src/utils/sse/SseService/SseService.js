@@ -1,6 +1,7 @@
 import EventSource from 'react-native-sse';
-import Base64 from '../sseLogics/base64Converter';
+
 import {Fetch} from '../../../biz/useAuth';
+import Base64 from '../sseLogics/base64Converter';
 
 let SseServiceOnlyOneInstance;
 
@@ -31,7 +32,7 @@ class SseService {
       }
 
     instanceCount += 1;
-    console.log('SseService 인스턴스 만든 횟수 ' + instanceCount);
+    //console.log('SseService 인스턴스 만든 횟수 ' + instanceCount);
 
     this.baseUrl = baseUrl;
     this.token = token;
@@ -69,7 +70,7 @@ class SseService {
   onMessage = e => {
     if (typeof e.data === 'string') {
       if (e.data.includes('EventStream')) {
-        console.log('Sse 연결을 성공하였습니다');
+        //console.log('Sse 연결을 성공하였습니다');
       } else {
         const receiveMessage =
           e.data && JSON.parse(Base64.decode(JSON.parse(e.data).body))[1];
@@ -135,14 +136,14 @@ class SseService {
   // 일단 만들었는데 아마 잘 안될듯
 
   onOpen = e => {
-    console.log('sse OnOpen됬어요');
+    //console.log('sse OnOpen됬어요');
   };
 
   onError = e => {
     if (!e.message) {
-      console.log(
-        'sse 에러가 뜹니다 (message가 빈 에러)' + new Date().toString(),
-      );
+      // console.log(
+      //   'sse 에러가 뜹니다 (message가 빈 에러)' + new Date().toString(),
+      //);
       (async () => {
         // console.log('autoLogin해서 토큰을 reissue해보자 ');
 
@@ -171,16 +172,16 @@ class SseService {
         }
       })();
     } else {
-      console.log('sse 에러가 뜹니다 ' + new Date().toString());
+      //console.log('sse 에러가 뜹니다 ' + new Date().toString());
 
       this.onReset();
     }
 
-    console.log(e);
+    //console.log(e);
   };
 
   onClose = e => {
-    console.log('Sse를 Close 하겠습니다. closing connection ' + new Date());
+    //console.log('Sse를 Close 하겠습니다. closing connection ' + new Date());
 
     this.eventSource.removeAllEventListeners();
     this.eventSource.close();
