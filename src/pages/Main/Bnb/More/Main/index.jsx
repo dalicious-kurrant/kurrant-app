@@ -6,6 +6,7 @@ import {useAtom} from 'jotai';
 import React, {useEffect, useState} from 'react';
 import {useCallback} from 'react';
 import {Alert, Pressable, ScrollView, StatusBar} from 'react-native';
+import {View} from 'react-native';
 import VersionCheck from 'react-native-version-check';
 import styled, {useTheme} from 'styled-components/native';
 import ArrowRightIcon from '~assets/icons/Arrow/arrowRight.svg';
@@ -16,32 +17,37 @@ import Typography from '~components/Typography';
 import Wrapper from '~components/Wrapper';
 import {PAGE_NAME as DietRepoMainPageName} from '~pages/Main/Bnb/DietRepo/Main';
 import {PAGE_NAME as TermOfServicePageName} from '~pages/Main/MyPage/TermOfService';
+import {PAGE_NAME as RecommendMakersMapPageName} from '~pages/Map/components/RecommendMakers/SearchResult';
+import {PAGE_NAME as RegisterInfoStartPageName} from '~pages/RegisterInfo/Start';
 
 import ListBox from './ListBox';
 import ListContainer from './ListContainer';
 import MembershipBox from './MembershipBox';
-
+import PointBox from './PointBox';
 import SkeletonUI from './SkeletonUI';
+import MakerRecommendIcon from '../../../../../assets/icons/Home/makers.svg';
 import useAuth from '../../../../../biz/useAuth';
 import useGroupSpots from '../../../../../biz/useGroupSpots';
-
-import {PAGE_NAME as testPageName} from '../../../../../jaesin/test';
-
-import PointBox from './PointBox';
-import {PAGE_NAME as GroupApplicationCheckPageName} from '../../../../Group/GroupApartment/ApartmentApplicationCheck';
-
-import {SCREEN_NAME as ReviewScreenName} from '../../../../../screens/Main/Review';
-
 import useReviewWait from '../../../../../biz/useReview/useReviewWait';
 import {
   redeemablePointsAtom,
   totalReviewWaitListAtom,
 } from '../../../../../biz/useReview/useReviewWait/store';
+import {RightSkinnyArrow} from '../../../../../components/Icon';
 import {useGetUserInfo} from '../../../../../hook/useUserInfo';
+import {PAGE_NAME as testPageName} from '../../../../../jaesin/test';
 import {PointMainPageName} from '../../../../../pages/Main/MyPage/Point';
 import {SCREEN_NAME as NoticeScreenName} from '../../../../../screens/Main/Notice';
 import {SCREEN_NAME as PurchaseHistoryName} from '../../../../../screens/Main/PurchaseHistory';
-
+import {SCREEN_NAME as ReviewScreenName} from '../../../../../screens/Main/Review';
+import {
+  sseType1Atom,
+  sseType2Atom,
+  sseType8Atom,
+} from '../../../../../utils/sse/sseLogics/store';
+import useSse from '../../../../../utils/sse/sseLogics/useSse';
+import SseRedDot from '../../../../../utils/sse/SseService/SseRedDot/SseRedDot';
+import {PAGE_NAME as GroupApplicationCheckPageName} from '../../../../Group/GroupApartment/ApartmentApplicationCheck';
 import {PAGE_NAME as MembershipInfoPageName} from '../../../../Membership/MembershipInfo';
 import {PAGE_NAME as MembershipIntroPageName} from '../../../../Membership/MembershipIntro';
 import {PAGE_NAME as LoginPageName} from '../../../Login/Login';
@@ -51,16 +57,6 @@ import {PAGE_NAME as FAQPageName} from '../../../MyPage/FAQ';
 import {PAGE_NAME as PersonalInfoPageName} from '../../../MyPage/PersonalInfo';
 import {PAGE_NAME as MealPageName} from '../../Meal/Main';
 import {PAGE_NAME as MealCartPageName} from '../../MealCart/Main';
-import SseRedDot from '../../../../../utils/sse/SseService/SseRedDot/SseRedDot';
-import useSse from '../../../../../utils/sse/sseLogics/useSse';
-import {PAGE_NAME as RegisterInfoStartPageName} from '~pages/RegisterInfo/Start';
-import {View} from 'react-native';
-import {RightSkinnyArrow} from '../../../../../components/Icon';
-import {
-  sseType1Atom,
-  sseType2Atom,
-  sseType8Atom,
-} from '../../../../../utils/sse/sseLogics/store';
 
 export const PAGE_NAME = 'P_MAIN__BNB__MORE';
 
@@ -266,6 +262,20 @@ const Pages = ({route}) => {
             </InfomationBox>
           </InfomationContainer>
           <Line />
+          {/* 메이커스 추천 */}
+          <View style={{marginLeft: 24, marginRight: 24}}>
+            <MakerRecommendView
+              onPress={() => navigation.navigate(RecommendMakersMapPageName)}>
+              <MakersRecommendInnerView>
+                <RecommendText>내가 아는 맛집</RecommendText>
+                <RecommendBoldText>
+                  <RecommendBoldText bold>메이커스</RecommendBoldText>로
+                  추천하기
+                </RecommendBoldText>
+              </MakersRecommendInnerView>
+              <MakerRecommendIcon />
+            </MakerRecommendView>
+          </View>
           <ListContainer title="이용 내역">
             <ListBox title="식사 일정" routeName={MealPageName} />
             <ListBox title="장바구니" routeName={MealCartPageName} />
@@ -418,6 +428,7 @@ const Line = styled.View`
   height: 6px;
   background-color: ${({theme}) => theme.colors.grey[8]};
   margin-top: 4px;
+  margin-bottom: 8px;
 `;
 
 const InfomationContainer = styled.View`
@@ -455,4 +466,28 @@ const RegisterInfoPressable = styled.Pressable`
 
 const ToRegisterInfoText = styled(Typography).attrs({text: 'Body07CaptionSB'})`
   color: ${({theme}) => theme.colors.grey[4]};
+`;
+const MakerRecommendView = styled.Pressable`
+  background-color: white;
+  width: 100%;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0px 16px;
+  border: 1px solid #f5f5f5;
+`;
+
+const MakersRecommendInnerView = styled.View`
+  padding-top: 17px;
+  //padding-bottom: 18px;
+`;
+
+const RecommendText = styled(Typography).attrs({text: 'CaptionR'})`
+  color: ${props => props.theme.colors.grey[2]};
+`;
+
+const RecommendBoldText = styled(Typography).attrs({text: 'Title03SB'})`
+  color: ${props =>
+    props.bold ? props.theme.colors.purple[500] : props.theme.colors.grey[2]};
 `;

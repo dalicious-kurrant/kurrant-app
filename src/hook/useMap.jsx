@@ -28,3 +28,20 @@ export function useGetAddress(roadAddress) {
     },
   );
 }
+
+export function useGetMakersAddress(makersCood) {
+  console.log(makersCood, 'hook');
+  return useQuery(
+    'makersAddress',
+    () => {
+      return mapApis.getMakersAddress(
+        makersCood.longitude,
+        makersCood.latitude,
+      );
+    },
+    {
+      // enabled: makersCood,
+      retry: false,
+    },
+  );
+}

@@ -231,6 +231,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B0BAC59D2AC10E46004AD832 /* libsqlite3.tbd */,
+				B065B1B92ABBDBEB005FCBE3 /* hermes.xcframework */,
 				2ABB8D9D2A1B4C3A00E8AD46 /* RNPermissions.framework */,
 				2ABB8D9B2A1B4A2200E8AD46 /* Permission_Notifications.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
@@ -766,7 +768,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65083302080BB717C382696 /* Pods-kurrant.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -802,7 +803,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BA7A73388BE4B74E96CC07B4 /* Pods-kurrant.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -1043,13 +1043,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 699CE2D3861D8A8D1DC95749 /* Pods-kurrant.staging.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = kurrant/kurrantRelease.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = GHN9DS56C5;
+				DEVELOPMENT_TEAM = P98WMV6993;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = kurrant/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "커런트";

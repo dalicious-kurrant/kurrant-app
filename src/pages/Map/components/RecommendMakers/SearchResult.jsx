@@ -1,67 +1,46 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useAtom} from 'jotai';
-import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  SafeAreaView,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from 'react-native';
+import {useEffect, useLayoutEffect, useState} from 'react';
+import React from 'react';
+import {Keyboard, TouchableWithoutFeedback, View} from 'react-native';
 import styled from 'styled-components';
 
-import AddressList from './components/AddressList';
-import AddressShareSpotList from './components/AddressShareSpotList';
-import NoResult from './components/NoResult';
-import Location from './Location';
-import Search from './Search';
-import {PAGE_NAME as ShareSpotMapPage} from './ShareSpotMap';
-import {mapApis} from '../../api/map';
-import {shareSpotApis} from '../../api/shareSpot';
-import Typography from '../../components/Typography';
-import {userLocationAtom} from '../../utils/store';
+import {mapApis} from '../../../../api/map';
+import {shareSpotApis} from '../../../../api/shareSpot';
+import Typography from '../../../../components/Typography';
+import {userLocationAtom} from '../../../../utils/store';
+import Location from '../../Location';
+import Search from '../../Search';
+import AddressList from '../AddressList';
+import AddressShareSpotList from '../AddressShareSpotList';
+import NoResult from '../NoResult';
 
-export const PAGE_NAME = 'MAP_SEARCH_RESULT';
+export const PAGE_NAME = 'RECOMMEND_MAKERS_SEARCH_RESULT';
 const SearchResult = ({route}) => {
-  const type = route?.params?.name;
-  const navigation = useNavigation();
+  const from = route?.params?.from;
   const [screen, setScreen] = useState(true); // 검색 결과 유무 전환
   const [data, setData] = useState([]);
-  const [initCenter, setInitCenter] = useAtom(userLocationAtom);
   const [focus, setFocus] = useState(false);
   const [text, setText] = useState('');
 
   const searchPress = async () => {
-    if (type === 'mySpot' || type === 'registerSpot') {
-      const res = await mapApis.searchObject(text);
-      console.log(res, 'res');
-      setScreen(false);
-      setData(res);
-    } else {
-      const res = await shareSpotApis.searchShareSpot();
-      const filterData = res.data.filter(
-        el =>
-          el.address.replace(/ /g, '').includes(text.replace(/ /g, '')) ||
-          el.jibunAddress.replace(/ /g, '').includes(text.replace(/ /g, '')),
-      );
-      setScreen(false);
-      setData(filterData);
-    }
+    const res = await mapApis.getMakersAddress(text);
+
+    setScreen(false);
+    setData(res);
     setFocus(false);
   };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle:
-        type === 'mySpot' || type === 'registerSpot'
-          ? '주소 검색'
-          : '공유 스팟 찾기',
-    });
-  }, []);
-  console.log(type, 'type');
+  useEffect(() => {
+    if (from) {
+      setText('');
+      setData([]);
+    }
+  }, [from]);
+
   return (
     <Wrap>
-      <View>
+      <View style={{marginBottom: 8}}>
         <Search
           setFocus={setFocus}
           focus={focus}
@@ -70,15 +49,6 @@ const SearchResult = ({route}) => {
           setText={setText}
         />
       </View>
-      <Contents
-        onTouchEnd={e => {
-          e.stopPropagation();
-          type === 'mySpot' || type === 'registerSpot'
-            ? navigation.goBack()
-            : navigation.navigate(ShareSpotMapPage);
-        }}>
-        <Location setInitCenter={setInitCenter} />
-      </Contents>
 
       <TouchableWithoutFeedback
         onPress={() => {
@@ -98,6 +68,8 @@ const SearchResult = ({route}) => {
                 <TitleExample> 예 {')'} 커런트 11-1</TitleExample>
                 <Title>・ 건물명,아파트명</Title>
                 <TitleExample> 예 {')'} 커런트 아파트 111동</TitleExample>
+                <Title>・ 음식점명</Title>
+                <TitleExample> 예 {')'} 커런트 파스타 선릉점</TitleExample>
               </View>
             </ContentWrap>
           )}
@@ -105,10 +77,8 @@ const SearchResult = ({route}) => {
           {/* 검색 결과 있음 */}
           {!screen && data?.length === 0 ? (
             <NoResult />
-          ) : type === 'mySpot' || type === 'registerSpot' ? (
-            <AddressList setFocus={setFocus} data={data} type={type} />
           ) : (
-            <AddressShareSpotList setFocus={setFocus} data={data} text={text} />
+            <AddressList setFocus={setFocus} data={data} type={'makers'} />
           )}
         </View>
       </TouchableWithoutFeedback>
