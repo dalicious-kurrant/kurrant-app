@@ -1,6 +1,6 @@
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useAtom} from 'jotai';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Pressable} from 'react-native';
 import NaverMapView, {Marker} from 'react-native-nmap';
 import styled from 'styled-components';
@@ -16,7 +16,7 @@ import {
   useSendRecommend,
 } from '../../hook/useRecommendMakers';
 import {useGroupSpotList} from '../../hook/useSpot';
-import {userLocationAtom} from '../../utils/store';
+import {userLocationAtom, userLocationInMakersAtom} from '../../utils/store';
 
 // latitude : 위도 (y) ,longitude :경도 (x)
 export const PAGE_NAME = 'RECOMMEND_MAKERS_MAP';
@@ -28,7 +28,7 @@ const RecommendMakersMap = ({route}) => {
   const zipCode = route?.params?.zipCode;
   const navigation = useNavigation();
   const [zoom, setZoom] = useState(17);
-  const [initCenter, setInitCenter] = useAtom(userLocationAtom); // 기초 좌표 강남역
+  const [initCenter, setInitCenter] = useAtom(userLocationInMakersAtom); // 기초 좌표 강남역
   const [selectId, setSelectId] = useState(null);
 
   const handleCameraChange = event => {
@@ -92,7 +92,7 @@ const RecommendMakersMap = ({route}) => {
       setZoom(17);
     }, []),
   );
-  console.log(selectId, resData?.recommendSpotId);
+
   return (
     <Wrap>
       <MapView>
