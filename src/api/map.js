@@ -104,12 +104,12 @@ export const mapApis = {
     return addrResult.documents;
   },
 
-  getMakersAddress: async query => {
-    const lat = 37.49703;
-    const lng = 127.028191;
-    const sort = 'accuracy';
+  getMakersAddress: async (query, location) => {
+    const lat = location.latitude.toString();
+    const lng = location.longitude.toString();
+    const sort = 'distance';
 
-    const apiUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${query}&x=${lat}&y=${lng}&sort=${sort}&category_group_code=FD6`;
+    const apiUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${query}&x=${lng}&y=${lat}&sort=${sort}&category_group_code=FD6`;
 
     const res = await fetch(apiUrl, {
       method: 'GET',
@@ -122,7 +122,7 @@ export const mapApis = {
     if (result.documents.length > 0) {
       return result.documents;
     }
-    const addrApiUrl = `https://dapi.kakao.com/v2/local/search/address.json?query=${query}&x=${lat}&y=${lng}&sort=${sort}`;
+    const addrApiUrl = `https://dapi.kakao.com/v2/local/search/address.json?query=${query}&x=${lat}&y=${lng}`;
 
     const addrRes = await fetch(addrApiUrl, {
       method: 'GET',

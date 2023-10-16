@@ -12,6 +12,12 @@ export const myLocationAtom = atomWithReset({
   longitude: 127.028191,
 });
 
+// 메이커스 추천 지도
+export const userLocationInMakersAtom = atomWithReset({
+  latitude: 37.49703,
+  longitude: 127.028191,
+});
+
 export const mainDimAtom = atomWithReset(false);
 
 export const mySpotRootAtom = atomWithReset();
