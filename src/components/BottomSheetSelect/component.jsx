@@ -1,6 +1,6 @@
 import BottomSheet, {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useNavigation} from '@react-navigation/native';
-import {th} from 'date-fns/locale';
+import {it, th} from 'date-fns/locale';
 import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react';
 import {
   Modal,
@@ -172,7 +172,7 @@ const BottomSheetSpot = props => {
                   onPressOut={pressOutUp}
                   onPress={e => {
                     e.stopPropagation();
-                    if (item.status) {
+                    if (item.status === undefined || item.status === true) {
                       console.log(item);
                       onSelect(item.id, item.text);
                       onPressEvent(item.id);
