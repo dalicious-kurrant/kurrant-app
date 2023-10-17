@@ -27,6 +27,9 @@ import {ActivityIndicator} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {useQueryClient} from 'react-query';
 import styled from 'styled-components';
+import {useTheme} from 'styled-components/native';
+import Arrow from '~assets/icons/Group/arrowDown.svg';
+import BottomSheetSelect from '~components/BottomSheetSelect';
 
 import MealDetailReview from './Review/MealDetailReview';
 import Card from './Review/MealDetailReview/Card/index';
@@ -79,13 +82,17 @@ const Pages = ({route}) => {
   const navigation = useNavigation();
   const {balloonEvent, BalloonWrap} = Balloon();
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [selectDefault, setSelectDefault] = useState(dailyFoodId);
+  const [modalOptionVisible, setModalOptionVisible] = useState(false);
   const [focus, setFocus] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-
+  const themeApp = useTheme();
   const [isScrollOver60, setIsScrollOver60] = useState(false);
 
   const [imgScroll, setImgScroll] = useState(true);
   const [foodDetailData, setFoodDetailData] = useAtom(foodDetailDataAtom);
+  const [childrenFood, setChildrenFood] = useState([]);
   const headerTitle = foodDetailData?.name;
   const {isfoodDetailDiscount} = useFoodDetail(); // 할인정보
   const {foodDetail} = useFoodDetail();
@@ -102,7 +109,7 @@ const Pages = ({route}) => {
     data: isFoodDetail,
     isFetching: detailFetching,
     refetch: detailRefetch,
-  } = useGetDailyfoodDetailNow(route.params.dailyFoodId, userRole); // 상세정보
+  } = useGetDailyfoodDetailNow(selectDefault, userRole); // 상세정보
 
   const indicatorAnim = useRef(new Animated.Value(0)).current;
 
@@ -157,7 +164,7 @@ const Pages = ({route}) => {
     isFetchingBottom,
 
     setAllReviewList,
-  } = useMainReviewHook(dailyFoodId, reviewIdFromWrittenReview);
+  } = useMainReviewHook(selectDefault, reviewIdFromWrittenReview);
 
   const [count, setCount] = useState(1);
 
@@ -179,7 +186,7 @@ const Pages = ({route}) => {
     ?.map(el =>
       el.cartDailyFoodDtoList.map(v =>
         v.cartDailyFoods.map(c => {
-          if (c.dailyFoodId === dailyFoodId) return c.count;
+          if (c.dailyFoodId === selectDefault) return c.count;
         }),
       ),
     )
@@ -190,7 +197,7 @@ const Pages = ({route}) => {
 
   useEffect(() => {
     async function loadFoodDetail() {
-      const foodData = await foodDetail(dailyFoodId);
+      const foodData = await foodDetail(selectDefault);
       if (foodData) {
         const meal = await loadMeal();
         if (meal) {
@@ -248,7 +255,9 @@ const Pages = ({route}) => {
             ),
     });
   }, [headerTitle, navigation, isScrollOver60]);
-
+  const onSelectOpenModal = () => {
+    setModalOptionVisible(true);
+  };
   const addCartPress = async () => {
     if (userRole === 'ROLE_GUEST') {
       return Alert.alert(
@@ -280,7 +289,7 @@ const Pages = ({route}) => {
     const duplication = isLoadMeal
       ?.map(v =>
         v.cartDailyFoodDtoList.map(el =>
-          el.cartDailyFoods.some(c => c.dailyFoodId === dailyFoodId),
+          el.cartDailyFoods.some(c => c.dailyFoodId === selectDefault),
         ),
       )
       .flat();
@@ -302,7 +311,7 @@ const Pages = ({route}) => {
       }
       await addMeal([
         {
-          dailyFoodId: dailyFoodId,
+          dailyFoodId: selectDefault,
           count: count,
           spotId: isUserInfo?.spotId,
           deliveryTime: time,
@@ -362,12 +371,25 @@ const Pages = ({route}) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (foodDetailData.dailyFoodId !== dailyFoodId) detailRefetch();
-    }, [dailyFoodId, detailRefetch, foodDetailData.dailyFoodId]),
+      if (foodDetailData.dailyFoodId !== selectDefault) detailRefetch();
+    }, [detailRefetch, foodDetailData.dailyFoodId, selectDefault]),
   );
+
   useEffect(() => {
     setHeight([]);
+    console.log(isFoodDetail?.data);
     if (isFoodDetail?.data) setFoodDetailData(isFoodDetail?.data);
+    if (isFoodDetail?.data?.childrenFoods?.length > 0)
+      setChildrenFood(
+        isFoodDetail?.data?.childrenFoods.map(v => {
+          return {
+            id: v.id,
+            text: v.name + '(' + v.price + ')',
+            value: v.id,
+            status: v.status === 1,
+          };
+        }),
+      );
   }, [isFoodDetail?.data, setFoodDetailData]);
 
   useEffect(() => {
@@ -383,7 +405,7 @@ const Pages = ({route}) => {
       foodDetailData.introImageList.map(image => {
         return resizeImage(image);
       });
-  }, [foodDetailData, dailyFoodId]);
+  }, [foodDetailData, selectDefault]);
   return (
     <>
       <Wrap>
@@ -556,11 +578,29 @@ const Pages = ({route}) => {
                                         label={`${foodDetailData?.spicy}`}
                                       />
                                     )}
+                                    {foodDetailData?.childrenFoods?.length >
+                                      0 && (
+                                      <DefaultCardBox>
+                                        <SpotView onPress={onSelectOpenModal}>
+                                          <SpotName>
+                                            {' '}
+                                            {foodDetailData?.childrenFoods?.find(
+                                              v => v.id === selectDefault,
+                                            )
+                                              ? foodDetailData?.childrenFoods?.find(
+                                                  v => v.id === selectDefault,
+                                                ).name
+                                              : '선택'}
+                                          </SpotName>
+                                          <Arrow />
+                                        </SpotView>
+                                      </DefaultCardBox>
+                                    )}
                                     <PriceTitleWrap>
                                       <PriceTitle>최종 판매가</PriceTitle>
                                       <ModalWrap>
                                         <Modal
-                                          id={dailyFoodId}
+                                          id={selectDefault}
                                           price={foodDetailData?.price || 0}
                                           membershipDiscountedPrice={
                                             foodDetailData?.membershipDiscountedPrice ||
@@ -795,7 +835,7 @@ const Pages = ({route}) => {
                             <MealDetailReview
                               foodName={foodDetailData?.name}
                               imageLocation={foodDetailData?.imageList}
-                              dailyFoodId={dailyFoodId}
+                              dailyFoodId={selectDefault}
                               starAverage={starAverage}
                               totalReview={totalReview}
                               initialLoading={initialLoading}
@@ -855,7 +895,7 @@ const Pages = ({route}) => {
                           return (
                             <Card
                               key={item.reviewId}
-                              dailyFoodId={dailyFoodId}
+                              dailyFoodId={selectDefault}
                               id={item.reviewId}
                               userName={item.userName}
                               item={item}
@@ -965,6 +1005,15 @@ const Pages = ({route}) => {
               isFounders: isUserInfo?.data?.leftFoundersNumber > 0,
             });
           }}
+        />
+        <BottomSheetSelect
+          modalVisible={modalOptionVisible}
+          setModalVisible={setModalOptionVisible}
+          title="옵션"
+          data={childrenFood}
+          selected={selectDefault}
+          setSelected={setSelectDefault}
+          firstSnap={'50%'}
         />
       </Wrap>
     </>
@@ -1220,4 +1269,20 @@ const Filler = styled.View`
       return 100;
     }
   }}px;
+`;
+
+const DefaultCardBox = styled.View``;
+
+const SpotView = styled.Pressable`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 24px;
+  border: 1px solid ${({theme}) => theme.colors.grey[7]};
+  border-radius: 14px;
+  width: 100%;
+  margin-top: 16px;
+`;
+const SpotName = styled(Typography).attrs({text: 'Body05R'})`
+  color: ${({theme}) => theme.colors.grey[2]};
 `;

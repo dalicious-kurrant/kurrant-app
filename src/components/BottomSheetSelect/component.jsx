@@ -1,5 +1,6 @@
 import BottomSheet, {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import {useNavigation} from '@react-navigation/native';
+import {th} from 'date-fns/locale';
 import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react';
 import {
   Modal,
@@ -14,6 +15,7 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import styled from 'styled-components/native';
 
 import CheckedIcon from '../../assets/icons/BottomSheet/Checked.svg';
+import Label from '../Label';
 import Typography from '../Typography';
 const screenHeight = Dimensions.get('screen').height;
 const screenWidth = Dimensions.get('screen').width;
@@ -118,7 +120,7 @@ const BottomSheetSpot = props => {
       resetBottomSheet.start();
     }
   }, [props.modalVisible, resetBottomSheet]);
-
+  console.log(data);
   const closeModal = () => {
     closeBottomSheet.start(() => {
       setModalVisible(false);
@@ -170,17 +172,39 @@ const BottomSheetSpot = props => {
                   onPressOut={pressOutUp}
                   onPress={e => {
                     e.stopPropagation();
-                    console.log(item);
-                    onSelect(item.id, item.text);
-                    onPressEvent(item.id);
+                    if (item.status) {
+                      console.log(item);
+                      onSelect(item.id, item.text);
+                      onPressEvent(item.id);
+                    }
                   }}>
-                  {selected === item.id ? (
-                    <ContentItemBox>
+                  {item?.status === undefined ? (
+                    selected === item.id ? (
+                      <ContentItemBox>
+                        <ContentItemText>{item.text}</ContentItemText>
+                        <CheckedIcon />
+                      </ContentItemBox>
+                    ) : (
                       <ContentItemText>{item.text}</ContentItemText>
-                      <CheckedIcon />
-                    </ContentItemBox>
+                    )
+                  ) : item?.status ? (
+                    selected === item.id ? (
+                      <ContentItemBox>
+                        <ContentItemText>{item.text}</ContentItemText>
+                        <CheckedIcon />
+                      </ContentItemBox>
+                    ) : (
+                      <ContentItemText>{item.text}</ContentItemText>
+                    )
                   ) : (
-                    <ContentItemText>{item.text}</ContentItemText>
+                    <ContentDisabledItemBox>
+                      <LabelWrap>
+                        <Label label={'품절'} />
+                      </LabelWrap>
+                      <ContentItemDiabledText>
+                        {item.text}
+                      </ContentItemDiabledText>
+                    </ContentDisabledItemBox>
                   )}
                 </ContentItemContainer>
               )}
@@ -264,13 +288,21 @@ const ContentItemBox = styled.View`
   justify-content: space-between;
   align-items: center;
 `;
-
+const ContentDisabledItemBox = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
 const ContentItemText = styled(Typography).attrs({text: 'Body05R'})``;
+const ContentItemDiabledText = styled(Typography).attrs({text: 'Body05R'})`
+  color: ${({theme}) => theme.colors.grey[5]};
+`;
 
 const GroupName = styled(Typography).attrs({text: 'Body06R'})`
   color: ${({theme}) => theme.colors.grey[4]};
 `;
-
+const LabelWrap = styled.View`
+  margin-right: 8px;
+`;
 const Border = styled.View`
   width: 100%;
   height: 1px;
