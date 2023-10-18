@@ -9,16 +9,18 @@ import styled from 'styled-components/native';
 import NoMealButton from '~components/Button';
 
 import Plus from '../../../../../assets/icons/Home/plus.svg';
+import QrIcon from '../../../../../assets/icons/Meal/qr.svg';
 import useAuth from '../../../../../biz/useAuth/hook';
 import {weekAtom} from '../../../../../biz/useBanner/store';
 import useFoodDaily from '../../../../../biz/useDailyFood/hook';
 import useOrderMeal from '../../../../../biz/useOrderMeal';
 import LabelButton from '../../../../../components/ButtonMeal';
 import BuyCalendar from '../../../../../components/BuyCalendar';
+import QRCodeComponent from '../../../../../components/QRCode/QRCode';
 import Toast from '../../../../../components/Toast';
 import Typography from '../../../../../components/Typography';
 import {
-  useGetDailyfood,
+  useGetDailyfoodDateList,
   useGetDailyfoodList,
 } from '../../../../../hook/useDailyfood';
 import {useGetOrderMeal} from '../../../../../hook/useOrder';
@@ -50,6 +52,7 @@ const Pages = ({route}) => {
   const queryClient = useQueryClient();
   const [touchDate, setTouchDate] = useState(data);
   const [show, setShow] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const userSpotId = isUserInfo?.spotId;
   const {refundItem, setOrderMeal} = useOrderMeal();
   const pagerRef = useRef();
@@ -65,13 +68,26 @@ const Pages = ({route}) => {
     ),
   );
   const [dailyfoodData, setDailyfoodData] = useState();
-  const {data: dailyfoodDataList, refetch: dailyfoodListRefetch} =
-    useGetDailyfoodList(
-      userSpotId,
-      formattedWeekDate(weekly[0][0]),
-      formattedWeekDate(weekly[weekly.length - 1][weekly[0].length - 1]),
-      userRole,
-    );
+  // const {data: dailyfoodDataList, refetch: dailyfoodListRefetch} =
+  //   useGetDailyfoodList(
+  //     userSpotId,
+  //     formattedWeekDate(weekly[0][0]),
+  //     formattedWeekDate(weekly[weekly.length - 1][weekly[0].length - 1]),
+  //     userRole,
+  //   );
+  const {
+    data: dailyfoodDataList,
+    refetch: dailyfoodListRefetch,
+    isFetching: dailyfoodListIsFetching,
+  } = useGetDailyfoodDateList(
+    userSpotId,
+    formattedWeekDate(weekly[0][0]),
+    formattedWeekDate(weekly[weekly.length - 1][weekly[0].length - 1]),
+    userRole,
+  );
+
+  const now = formattedDate(touchDate) === formattedDate(new Date());
+
   useEffect(() => {
     if (dailyfoodDataList?.data?.dailyFoodsByDate) {
       setMorning([]);
@@ -86,13 +102,7 @@ const Pages = ({route}) => {
       );
     }
   }, [dailyfoodDataList?.data?.dailyFoodsByDate, date]);
-  // const {
-  //   data: dailyfoodData,
-  //   refetch: dailyfoodRefetch,
-  //   isLoading: dailyLoading,
-  //   isFetching: dailyFetching,
-  // } = useGetDailyfood(userSpotId, data ? data : date);
-  // const todayMeal = isOrderMeal?.filter(m => m.serviceDate === date);
+
   const selectDate = isOrderMeal?.data?.filter(
     m => m.serviceDate === touchDate,
   );
@@ -101,9 +111,7 @@ const Pages = ({route}) => {
     setTouchDate(day ?? data);
   };
 
-  // console.log(isOrderMeal, '밀정보');
   const cancelMealPress = id => {
-    // console.log(id, '밀 취소');
     const list = isOrderMeal?.data.map(el => {
       return {
         ...el,
@@ -219,25 +227,36 @@ const Pages = ({route}) => {
   );
   return (
     <SafeView>
+      <CalendarWrap>
+        <BuyCalendar
+          BooleanValue
+          pagerRef={pagerRef}
+          type={'grey2'}
+          color={'white'}
+          size={'Body05R'}
+          onPressEvent2={pressDay}
+          selectDate={touchDate}
+          daliy={true}
+          meal={meal}
+          margin={'0px 28px'}
+          sliderValue={isToday && 0}
+          isServiceDays={dailyfoodDataList?.data?.diningTypes}
+        />
+      </CalendarWrap>
       <ScrollView>
-        <CalendarWrap>
-          <BuyCalendar
-            BooleanValue
-            pagerRef={pagerRef}
-            type={'grey2'}
-            color={'white'}
-            size={'Body05R'}
-            onPressEvent2={pressDay}
-            selectDate={touchDate}
-            daliy={true}
-            meal={meal}
-            margin={'0px 28px'}
-            sliderValue={isToday && 0}
-            isServiceDays={dailyfoodDataList?.data?.diningTypes}
-          />
-        </CalendarWrap>
-
         <MealWrap>
+          {/* qrCode */}
+          {/* {now && (
+            <>
+              <QRButton
+                onPress={() => {
+                  setQrOpen(true);
+                }}>
+                <QrIcon />
+              </QRButton>
+              <QRCodeComponent modal={qrOpen} setModal={setQrOpen} />
+            </>
+          )} */}
           {touchDate ? (
             <>
               {selectDate?.map(s => {
@@ -285,6 +304,7 @@ const Pages = ({route}) => {
                           onPress={() =>
                             navigation.navigate(MealDetailPageName, {
                               dailyFoodId: sm.dailyFoodId,
+                              isMeal: true,
                             })
                           }>
                           <MakersName>{sm.makers}</MakersName>
@@ -438,6 +458,7 @@ const Pages = ({route}) => {
       <ButtonWrap>
         <PlusButton
           onPress={() => {
+            console.log(touchDate, 'touchDate');
             navigation.navigate(BuyMealPageName, {
               date: touchDate ? touchDate : formattedDate(new Date()),
             });
@@ -580,5 +601,15 @@ const DeadlineGuide = styled.View`
   border-top-right-radius: 7px;
   left: 0px;
   background: #1d1c2180;
+  z-index: 999;
+`;
+
+const QRButton = styled.Pressable`
+  position: absolute;
+  background-color: ${({theme}) => theme.colors.grey[8]};
+  border-radius: 8px;
+  padding: 4px 8px;
+  right: 0px;
+  top: 24px;
   z-index: 999;
 `;

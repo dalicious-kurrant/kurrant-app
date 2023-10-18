@@ -9,12 +9,13 @@ import Typography from '../../../components/Typography';
 import {mySpotRootAtom} from '../../../utils/store';
 import {PAGE_NAME as DetailAddressPage} from '../../Spots/mySpot/DetailAddress';
 import {PAGE_NAME as ApplySpot} from '../../Spots/shareSpot/ApplySpot';
+import {PAGE_NAME as MakersMapPage} from '../RecommendMakersMap';
 
 const AddressList = ({setFocus, data, type}) => {
   const navigation = useNavigation();
   const [fromRoot, setFromRoot] = useAtom(mySpotRootAtom); // 어느 경로로 왔는지 0 : 지도에서 1: 검색 리스트에서
 
-  const onPress = async (name, address, x, y) => {
+  const onPress = async (name, address, x, y, resData) => {
     const res = await mapApis.getRoadAddress(x, y);
     const jibunRes = await mapApis.getAddress(address);
 
@@ -28,6 +29,14 @@ const AddressList = ({setFocus, data, type}) => {
         showAddress: true,
         type: 'registerSpot',
         from: 'application',
+      });
+    } else if (type === 'makers') {
+      navigation.navigate(MakersMapPage, {
+        location: {latitude: Number(y), longitude: Number(x)},
+        name: name,
+        address: address,
+        data: resData,
+        zipCode: res.zipcode,
       });
     } else {
       navigation.navigate(DetailAddressPage, {
@@ -66,6 +75,7 @@ const AddressList = ({setFocus, data, type}) => {
                     : el.address_name,
                   el.x,
                   el.y,
+                  el,
                 );
                 setFromRoot(1);
               }}>
@@ -94,7 +104,7 @@ const Wrap = styled.ScrollView`
 `;
 
 const Contents = styled.Pressable`
-  padding: 16px 0px 16px 24px;
+  padding: 16px 16px 16px 24px;
   border-bottom: solid;
   border-bottom-width: 1px;
   border-color: ${({theme}) => theme.colors.grey[8]};

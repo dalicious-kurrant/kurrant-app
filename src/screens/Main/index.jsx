@@ -277,7 +277,48 @@ import Review, {SCREEN_NAME as ReviewScreenName} from './Review';
 
 import ReportReview, {
   PAGE_NAME as ReportReviewPageName,
+  // } from './Review/ReportReview';
 } from '../../pages/Main/MyPage/Review/ReportReview';
+
+// 회원정보입력
+import RegisterInfoStart, {
+  PAGE_NAME as RegisterInfoStartPageName,
+} from '../../pages/RegisterInfo/Start';
+import RegisterInfoPage1, {
+  PAGE_NAME as RegisterInfoPage1PageName,
+} from '../../pages/RegisterInfo/Page1';
+import RegisterInfoPage2, {
+  PAGE_NAME as RegisterInfoPage2PageName,
+} from '../../pages/RegisterInfo/Page2';
+import RegisterInfoPage3, {
+  PAGE_NAME as RegisterInfoPage3PageName,
+} from '../../pages/RegisterInfo/Page3';
+import RegisterInfoPage4, {
+  PAGE_NAME as RegisterInfoPage4PageName,
+} from '../../pages/RegisterInfo/Page4';
+
+import RegisterInfoPage5, {
+  PAGE_NAME as RegisterInfoPage5PageName,
+} from '../../pages/RegisterInfo/Page5';
+import RegisterInfoPage6, {
+  PAGE_NAME as RegisterInfoPage6PageName,
+} from '../../pages/RegisterInfo/Page6';
+import RegisterInfoPage7, {
+  PAGE_NAME as RegisterInfoPage7PageName,
+} from '../../pages/RegisterInfo/Page7_8_9_10/Page7';
+import RegisterInfoPage8, {
+  PAGE_NAME as RegisterInfoPage8PageName,
+} from '../../pages/RegisterInfo/Page7_8_9_10/Page8';
+import RegisterInfoPage9, {
+  PAGE_NAME as RegisterInfoPage9PageName,
+} from '../../pages/RegisterInfo/Page7_8_9_10/Page9';
+import RegisterInfoPage10, {
+  PAGE_NAME as RegisterInfoPage10PageName,
+} from '../../pages/RegisterInfo/Page7_8_9_10/Page10';
+
+import RegisterInfoFinish, {
+  PAGE_NAME as RegisterInfoFinishPageName,
+} from '../../pages/RegisterInfo/Finish';
 
 // 식단 리포트
 
@@ -341,6 +382,9 @@ import NotificationCenter, {
 import SplashPage, {PAGE_NAME as SplashPageName} from '../../pages/Splash';
 
 // map
+import RecommendMakersMap, {
+  PAGE_NAME as RecommendMakersMapPage,
+} from '../../pages/Map/RecommendMakersMap';
 import SpotType, {PAGE_NAME as SpotTypePage} from '../../pages/Spots/SpotType';
 import MySpotMap, {PAGE_NAME as MySpotMapPage} from '../../pages/Map/MySpotMap';
 import ShareSpotMap, {
@@ -349,6 +393,9 @@ import ShareSpotMap, {
 import SearchResult, {
   PAGE_NAME as MapSearchResult,
 } from '../../pages/Map/SearchResult';
+import RecommendMakersSearchResult, {
+  PAGE_NAME as RecommendMakersSearchResultPage,
+} from '../../pages/Map/components/RecommendMakers/SearchResult';
 import MySpotDetail, {
   PAGE_NAME as MySpotDetailPage,
 } from '../../pages/Spots/mySpot/DetailAddress';
@@ -379,6 +426,9 @@ import InviteSpot, {
 import MySpotDelivery, {
   PAGE_NAME as MySpotDeliveryPage,
 } from '../../pages/Spots/mySpot/Delivery';
+import AfterRecommend, {
+  PAGE_NAME as AfterRecommendPage,
+} from '../../pages/Map/components/RecommendMakers/AfterRecommend';
 
 import NicknamePage, {
   PAGE_NAME as NicknamePageName,
@@ -1096,6 +1146,7 @@ const Screen = () => {
               lineHeight: 22,
             },
             headerShadowVisible: false,
+            // 리뷰 page2에서 올떄는 그냥 백버튼이면 안됨
             headerLeft: () => <BackButton margin={[10, 0]} />,
           }}
         />
@@ -2208,11 +2259,8 @@ const Screen = () => {
                       {
                         text: '수정종료',
                         onPress: () => {
-                          navigation.navigate(WrittenReviewPageName, {
-                            screen: ReviewScreenName,
-                            params: {
-                              tabIndex: 1,
-                            },
+                          navigation.navigate(ReviewScreenName, {
+                            screen: WrittenReviewPageName,
                           });
 
                           return;
@@ -2250,6 +2298,202 @@ const Screen = () => {
         />
       </MainRoot.Group>
 
+      {/* 회원정보입력 */}
+
+      <MainRoot.Group>
+        <MainRoot.Screen
+          name={RegisterInfoStartPageName}
+          component={RegisterInfoStart}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <ReviewCloseIcon />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage1PageName}
+          component={RegisterInfoPage1}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage2PageName}
+          component={RegisterInfoPage2}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage3PageName}
+          component={RegisterInfoPage3}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage4PageName}
+          component={RegisterInfoPage4}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage5PageName}
+          component={RegisterInfoPage5}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage6PageName}
+          component={RegisterInfoPage6}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage7PageName}
+          component={RegisterInfoPage7}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage8PageName}
+          component={RegisterInfoPage8}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage9PageName}
+          component={RegisterInfoPage9}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+        <MainRoot.Screen
+          name={RegisterInfoPage10PageName}
+          component={RegisterInfoPage10}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+
+        <MainRoot.Screen
+          name={RegisterInfoFinishPageName}
+          component={RegisterInfoFinish}
+          options={{
+            headerShown: true,
+            title: '회원 정보 입력',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+            headerShadowVisible: false,
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+          }}
+        />
+      </MainRoot.Group>
       {/* 식단 리포트 */}
 
       <MainRoot.Group>
@@ -2269,6 +2513,7 @@ const Screen = () => {
             headerLeft: () => <BackButton margin={[10, 0]} />,
           }}
         />
+
         <MainRoot.Screen
           name={DietRepoHistoryPageName}
           component={DietRepoHistory}
@@ -2285,6 +2530,7 @@ const Screen = () => {
             headerLeft: () => <BackButton margin={[10, 0]} />,
           }}
         />
+
         <MainRoot.Screen
           name={DietRepoAddDietPageName}
           component={DietRepoAddDiet}
@@ -2301,6 +2547,7 @@ const Screen = () => {
             headerLeft: () => <BackButton margin={[10, 0]} />,
           }}
         />
+
         <MainRoot.Screen
           name={DietRepoAddMyDietPageName}
           component={DietRepoAddMyDiet}
@@ -2355,6 +2602,39 @@ const Screen = () => {
           }}
         />
         <MainRoot.Screen
+          name={RecommendMakersMapPage}
+          component={RecommendMakersMap}
+          options={{
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+            headerShown: true,
+            headerShadowVisible: false,
+            //headerTransparent: true,
+            title: '맛집 추천하기',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+          }}
+        />
+        <MainRoot.Screen
+          name={AfterRecommendPage}
+          component={AfterRecommend}
+          options={{
+            headerBackVisible: false,
+            headerShown: true,
+            headerShadowVisible: false,
+            title: '맛집 추천하기',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+          }}
+        />
+        <MainRoot.Screen
           name={ShareSpotListPage}
           component={ShareSpotList}
           options={{
@@ -2380,6 +2660,23 @@ const Screen = () => {
             headerShadowVisible: false,
             //headerTransparent: true,
             // title: '주소 검색',
+            headerTitleAlign: 'center',
+            headerTitleStyle: {
+              fontFamily: 'Pretendard-SemiBold',
+              fontSize: 14,
+              lineHeight: 22,
+            },
+          }}
+        />
+        <MainRoot.Screen
+          name={RecommendMakersSearchResultPage}
+          component={RecommendMakersSearchResult}
+          options={{
+            headerLeft: () => <BackButton margin={[10, 0]} />,
+            headerShown: true,
+            headerShadowVisible: false,
+            //headerTransparent: true,
+            title: '주소 검색',
             headerTitleAlign: 'center',
             headerTitleStyle: {
               fontFamily: 'Pretendard-SemiBold',

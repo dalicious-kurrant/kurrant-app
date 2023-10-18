@@ -4,37 +4,57 @@ import {Dimensions, ScrollView} from 'react-native';
 import HTML, {RenderHTML, defaultSystemFonts} from 'react-native-render-html';
 import styled, {useTheme} from 'styled-components';
 
-import {setStorage} from '../../utils/asyncStorage';
+import {getStorage, setStorage} from '../../utils/asyncStorage';
 import {removeItemFromStorage} from '../../utils/asyncStorage';
 import Typography from '../Typography';
 
 const Component = ({modalVisible, data, setModalVisible}) => {
   const systemFonts = [...defaultSystemFonts, 'Pretendard'];
 
+  const [currentIndex, setCurrentIndex] = useState(0);
   const source = {
-    html: `<div style="  padding-left:24px; padding-right:20px; "> 
-        ${data.content}
+    html: `<div style="padding-left:24px; padding-right:24px; "> 
+        ${data[currentIndex].content}
         </div>`,
   };
 
-  const handleMessageRead = async () => {
-    // 1. 클릭하면 localstorage에 클릭한 날짜 저장
-    // 기존거 지우고 새로운거 올리기
-    await removeItemFromStorage('announcementsClickedOneDate');
+  const tagsStyles = {
+    img: {
+      width: 280,
+      marginVertical: 0,
+      marginHorizontal: 0,
+    },
+    p: {
+      margin: 0,
+      padding: 0,
+    },
+  };
 
-    const checkedTimeObject = {};
-    checkedTimeObject[data.id.toString()] = Date.now();
+  const handleMessageRead = async () => {
+    const clickedDates =
+      JSON.parse(await getStorage('announcementsClickedOneDate')) || [];
+
+    clickedDates.push({id: data[currentIndex].id, date: Date.now()});
 
     await setStorage(
       'announcementsClickedOneDate',
-      JSON.stringify(checkedTimeObject),
+      JSON.stringify(clickedDates),
     );
 
-    // 2. modalVisible
-    setModalVisible(false);
+    if (currentIndex < data?.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setModalVisible(false);
+    }
   };
 
-  // 폰트 적용하기
+  const confirmPress = () => {
+    if (currentIndex < data?.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setModalVisible(false);
+    }
+  };
 
   return (
     <CenteredView>
@@ -45,13 +65,13 @@ const Component = ({modalVisible, data, setModalVisible}) => {
               onPress={() => {
                 handleMessageRead();
               }}>
-              <ModalText>일주일간 보지 않기 x</ModalText>
+              <ModalText>다시 보지 않기 x</ModalText>
             </MessageReadPressable>
 
             <TitleView>
-              <TitleText>{data.title}</TitleText>
+              <TitleText>{data[currentIndex].title}</TitleText>
 
-              <DateText>{data.updated}</DateText>
+              <DateText>{data[currentIndex].updated}</DateText>
             </TitleView>
 
             <ContenContainerScrollView>
@@ -60,23 +80,13 @@ const Component = ({modalVisible, data, setModalVisible}) => {
                   contentWidth={Dimensions.get('window').width}
                   source={source}
                   systemFonts={systemFonts}
-                  // tagsStyles={{
-                  //   div: {
-                  //     color: '#1e1e96',
-                  //     textDecorationLine: 'none',
-                  //     fontFamily: 'Pretendard',
-                  //     fontWeight: 'bold',
-                  //   },
-                  // }}
+                  tagsStyles={tagsStyles}
                 />
               }
 
               <Filler />
             </ContenContainerScrollView>
-            <ConfirmPressable
-              onPress={() => {
-                setModalVisible(false);
-              }}>
+            <ConfirmPressable onPress={confirmPress}>
               <ConfirmText>확인</ConfirmText>
             </ConfirmPressable>
           </ModalView>
@@ -86,7 +96,7 @@ const Component = ({modalVisible, data, setModalVisible}) => {
   );
 };
 
-export default Component;
+export default React.memo(Component);
 
 const CenteredView = styled.View`
   flex: 1;
@@ -100,7 +110,7 @@ const ModalView = styled.View`
   margin: 20px;
   background-color: white;
   /* border-radius: 20px; */
-  padding: 10px;
+  //padding: 10px;
   padding-top: 20px;
   padding-bottom: 24px;
 
@@ -113,18 +123,20 @@ const ModalView = styled.View`
 `;
 
 const TitleView = styled.View`
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  background-color: white;
+  /* border-top-left-radius: 10px;
+  border-top-right-radius: 10px; */
+
   display: flex;
   flex-direction: column;
   width: 100%;
-
   padding: 0 24px;
   padding-bottom: 24px;
   position: relative;
   top: 0;
   /* border: 1px solid black; */
+  border-bottom-color: ${({theme}) => theme.colors.grey[8]};
+  border-bottom-width: 1px;
+  margin-bottom: 22px;
 `;
 
 const TitleText = styled(Typography).attrs({text: 'Title04SB'})`
@@ -160,6 +172,7 @@ const ModalText = styled.Text`
 const ContenContainerScrollView = styled(ScrollView)`
   padding-bottom: 24px;
   position: relative;
+  width: 100%;
 `;
 
 const ConfirmPressable = styled.Pressable`

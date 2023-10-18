@@ -36,6 +36,8 @@ import {changeSeperator} from '../../../../../utils/dateFormatter';
 
 // const onlyForMakers = false;
 
+import {PAGE_NAME as mealDetailPageName} from '../../../../../pages/Main/Bnb/MealDetail/Main';
+
 const Component = ({
   id,
   editItem,
@@ -52,7 +54,15 @@ const Component = ({
   updateDate,
   commentList,
   toast,
+  dailyFoodId,
+  sseType8List,
 }) => {
+  // dailyFoodId
+  // deliveryTime
+  // 필요
+
+  // console.log(dailyFoodId);
+
   const navigation = useNavigation();
 
   const [imageModalVisible, setImageModalVisible] = useState(false);
@@ -98,7 +108,6 @@ const Component = ({
               const response = await deleteReview2({id: id});
 
               if (response.statusCode !== 200) {
-                console.log(response);
                 Alert.alert('리뷰 삭제 실패', `${response.message}`, [
                   {
                     text: '확인',
@@ -150,7 +159,14 @@ const Component = ({
   return (
     <Container focusId={focusId} id={id}>
       <TopWrap>
-        <TitleWrap>
+        <TitlePressable
+          onPress={() => {
+            navigation.navigate(mealDetailPageName, {
+              dailyFoodId,
+              disableAddCartFromReview: true,
+              reviewIdFromWrittenReview: !forMakers && id,
+            });
+          }}>
           <RestaurentNameText numberOfLines={1} ellipsizeMode="tail">
             {'['}
             {makersName}
@@ -158,7 +174,7 @@ const Component = ({
             {foodName}
           </RestaurentNameText>
           <ArrowRightGrey4 />
-        </TitleWrap>
+        </TitlePressable>
 
         <EditWrap>
           <Pressable
@@ -304,6 +320,7 @@ const Component = ({
                   pngLink={v.pngLink}
                   writtenDate={v.createDate}
                   message={v.content}
+                  isSseType8={sseType8List.includes(v.commentId)}
                 />
               </CommentWrap>
             );
@@ -336,7 +353,7 @@ const TopWrap = styled.View`
   justify-content: space-between;
   margin-bottom: 5px;
 `;
-const TitleWrap = styled.View`
+const TitlePressable = styled.Pressable`
   flex-direction: row;
   align-items: center;
   width: 78%;

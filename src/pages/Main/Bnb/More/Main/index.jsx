@@ -6,6 +6,7 @@ import {useAtom} from 'jotai';
 import React, {useEffect, useState} from 'react';
 import {useCallback} from 'react';
 import {Alert, Pressable, ScrollView, StatusBar} from 'react-native';
+import {View} from 'react-native';
 import VersionCheck from 'react-native-version-check';
 import styled, {useTheme} from 'styled-components/native';
 import ArrowRightIcon from '~assets/icons/Arrow/arrowRight.svg';
@@ -16,12 +17,15 @@ import Typography from '~components/Typography';
 import Wrapper from '~components/Wrapper';
 import {PAGE_NAME as DietRepoMainPageName} from '~pages/Main/Bnb/DietRepo/Main';
 import {PAGE_NAME as TermOfServicePageName} from '~pages/Main/MyPage/TermOfService';
+import {PAGE_NAME as RecommendMakersMapPageName} from '~pages/Map/components/RecommendMakers/SearchResult';
+import {PAGE_NAME as RegisterInfoStartPageName} from '~pages/RegisterInfo/Start';
 
 import ListBox from './ListBox';
 import ListContainer from './ListContainer';
 import MembershipBox from './MembershipBox';
 import PointBox from './PointBox';
 import SkeletonUI from './SkeletonUI';
+import MakerRecommendIcon from '../../../../../assets/icons/Home/makers.svg';
 import useAuth from '../../../../../biz/useAuth';
 import useGroupSpots from '../../../../../biz/useGroupSpots';
 import useReviewWait from '../../../../../biz/useReview/useReviewWait';
@@ -29,12 +33,20 @@ import {
   redeemablePointsAtom,
   totalReviewWaitListAtom,
 } from '../../../../../biz/useReview/useReviewWait/store';
+import {RightSkinnyArrow} from '../../../../../components/Icon';
 import {useGetUserInfo} from '../../../../../hook/useUserInfo';
+import {PAGE_NAME as testPageName} from '../../../../../jaesin/test';
 import {PointMainPageName} from '../../../../../pages/Main/MyPage/Point';
 import {SCREEN_NAME as NoticeScreenName} from '../../../../../screens/Main/Notice';
 import {SCREEN_NAME as PurchaseHistoryName} from '../../../../../screens/Main/PurchaseHistory';
 import {SCREEN_NAME as ReviewScreenName} from '../../../../../screens/Main/Review';
-import {PAGE_NAME as ReportReviewPageName} from '../../../../../screens/Main/Review/ReportReview';
+import {
+  sseType1Atom,
+  sseType2Atom,
+  sseType8Atom,
+} from '../../../../../utils/sse/sseLogics/store';
+import useSse from '../../../../../utils/sse/sseLogics/useSse';
+import SseRedDot from '../../../../../utils/sse/SseService/SseRedDot/SseRedDot';
 import {PAGE_NAME as GroupApplicationCheckPageName} from '../../../../Group/GroupApartment/ApartmentApplicationCheck';
 import {PAGE_NAME as MembershipInfoPageName} from '../../../../Membership/MembershipInfo';
 import {PAGE_NAME as MembershipIntroPageName} from '../../../../Membership/MembershipIntro';
@@ -48,7 +60,10 @@ import {PAGE_NAME as MealCartPageName} from '../../MealCart/Main';
 
 export const PAGE_NAME = 'P_MAIN__BNB__MORE';
 
-const Pages = () => {
+const Pages = ({route}) => {
+  const [total] = useAtom(totalReviewWaitListAtom);
+  const [redeemablePoints] = useAtom(redeemablePointsAtom);
+
   const themeApp = useTheme();
   const navigation = useNavigation();
   const {
@@ -64,19 +79,22 @@ const Pages = () => {
 
   const {getReviewWait} = useReviewWait();
 
+  const {sseHistory} = useSse();
+  const [sseType1] = useAtom(sseType1Atom);
+  const [sseType2] = useAtom(sseType2Atom);
+
+  const [sseType8] = useAtom(sseType8Atom);
+
   useEffect(() => {
     getReviewWait();
-  }, []);
-
-  const [total, iAmNotUsingThis] = useAtom(totalReviewWaitListAtom);
-
-  const [redeemablePoints] = useAtom(redeemablePointsAtom);
+  }, [sseType8?.id]);
 
   const [versionChecked, setVersionChecked] = useState(false);
   const currentVersion = VersionCheck.getCurrentVersion();
   const {
     data: {data: isUserInfo},
   } = useGetUserInfo();
+
   const getData = async () => {
     await userMe();
     await userMePersonal();
@@ -130,27 +148,42 @@ const Pages = () => {
       getData();
     }
   }, []);
+
   if (!isUserInfo) {
     return <SkeletonUI />;
   }
   return (
     <Container>
-      <Wrapper paddingTop={24}>
+      <Wrapper paddingTop={40}>
         <ScrollView>
           {isUserInfo ? (
-            <LoginBox>
-              <LoginIdBox>
-                <Typography
-                  text="Title02SB"
-                  textColor={themeApp.colors.grey[2]}>
-                  {isUserInfo?.nickname ?? isUserInfo?.name}님
-                </Typography>
-              </LoginIdBox>
-              <Pressable
-                onPress={() => navigation.navigate(PersonalInfoPageName)}>
-                <SettingIcon height={16} width={8} />
-              </Pressable>
-            </LoginBox>
+            <View>
+              {/* <RegisterInfoPressable
+                onPress={() => {
+                  navigation.navigate(RegisterInfoStartPageName);
+                }}
+                style={{marginLeft: 24}}>
+                <ToRegisterInfoText>회원 정보 입력하기 </ToRegisterInfoText>
+                <RightSkinnyArrow
+                  width={'5px'}
+                  height={'9px'}
+                  color={themeApp.colors.grey[4]}
+                />
+              </RegisterInfoPressable> */}
+              <LoginBox>
+                <LoginIdBox>
+                  <Typography
+                    text="Title02SB"
+                    textColor={themeApp.colors.grey[2]}>
+                    {isUserInfo?.nickname ?? isUserInfo?.name}님
+                  </Typography>
+                </LoginIdBox>
+                <Pressable
+                  onPress={() => navigation.navigate(PersonalInfoPageName)}>
+                  <SettingIcon height={16} width={8} />
+                </Pressable>
+              </LoginBox>
+            </View>
           ) : (
             <LoginBox
               onPress={async () => {
@@ -183,17 +216,26 @@ const Pages = () => {
               onPress={() => {
                 navigation.navigate(ReviewScreenName);
               }}>
-              <InfomationText
-                text={'Title02SB'}
-                textColor={themeApp.colors.grey[2]}>
-                {total}
-              </InfomationText>
+              <SseRedDotType3
+                // sseType3
+                isSse={total > 0}
+                position="absolute"
+                right="-10px"
+                top="0px">
+                <InfomationText
+                  text={'Title02SB'}
+                  textColor={themeApp.colors.grey[2]}>
+                  {total}
+                </InfomationText>
+              </SseRedDotType3>
+
               <InfomationLabel
                 text={'CaptionR'}
                 textColor={themeApp.colors.grey[2]}>
                 구매후기
               </InfomationLabel>
             </InfomationBox>
+
             <InfomationBox>
               <InfomationText
                 text={'Title02SB'}
@@ -220,6 +262,20 @@ const Pages = () => {
             </InfomationBox>
           </InfomationContainer>
           <Line />
+          {/* 메이커스 추천 */}
+          <View style={{marginLeft: 24, marginRight: 24}}>
+            <MakerRecommendView
+              onPress={() => navigation.navigate(RecommendMakersMapPageName)}>
+              <MakersRecommendInnerView>
+                <RecommendText>내가 아는 맛집</RecommendText>
+                <RecommendBoldText>
+                  <RecommendBoldText bold>메이커스</RecommendBoldText>로
+                  추천하기
+                </RecommendBoldText>
+              </MakersRecommendInnerView>
+              <MakerRecommendIcon />
+            </MakerRecommendView>
+          </View>
           <ListContainer title="이용 내역">
             <ListBox title="식사 일정" routeName={MealPageName} />
             <ListBox title="장바구니" routeName={MealCartPageName} />
@@ -229,6 +285,12 @@ const Pages = () => {
 
             <ListBox
               title="리뷰 관리"
+              isSse={
+                // sseType8
+                total > 0 ||
+                (!!sseType8.type && !sseType8.read) ||
+                !!sseHistory?.find(v => v.type === 8)
+              }
               description={redeemablePoints > 0 && `모두 작성시 최대 `}
               effect={
                 redeemablePoints > 0 && (
@@ -262,7 +324,20 @@ const Pages = () => {
             {/* <ListBox title="식단 리포트" routeName={DietRepoMainPageName} /> */}
           </ListContainer>
           <ListContainer title="알림">
-            <ListBox title="공지사항" routeName={NoticeScreenName} />
+            <ListBox
+              isSse={
+                // sseType1, sseType2
+                (!!sseType1.type && !sseType1.read) ||
+                !!sseHistory?.find(v => v.type === 1) ||
+                (!!sseType2.type && !sseType2.read) ||
+                !!sseHistory?.find(v => v.type === 2)
+
+                // false
+              }
+              title="공지사항"
+              routeName={NoticeScreenName}
+            />
+
             <ListBox
               title="약관 및 개인 정보"
               routeName={TermOfServicePageName}
@@ -319,6 +394,7 @@ const Container = styled.SafeAreaView`
   padding-top: ${Math.round(StatusBar.currentHeight)}px;
   background-color: white;
 `;
+
 const LoginBox = styled.Pressable`
   flex-direction: row;
   align-items: center;
@@ -352,6 +428,7 @@ const Line = styled.View`
   height: 6px;
   background-color: ${({theme}) => theme.colors.grey[8]};
   margin-top: 4px;
+  margin-bottom: 8px;
 `;
 
 const InfomationContainer = styled.View`
@@ -379,4 +456,38 @@ const InfomationLabel = styled(Typography)``;
 const InfomationCaption = styled(Typography)`
   font-size: 10px;
   font-family: 'Pretendard-Regular';
+`;
+
+const SseRedDotType3 = styled(SseRedDot)``;
+const RegisterInfoPressable = styled.Pressable`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const ToRegisterInfoText = styled(Typography).attrs({text: 'Body07CaptionSB'})`
+  color: ${({theme}) => theme.colors.grey[4]};
+`;
+const MakerRecommendView = styled.Pressable`
+  background-color: white;
+  width: 100%;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0px 16px;
+  border: 1px solid #f5f5f5;
+`;
+
+const MakersRecommendInnerView = styled.View`
+  padding-top: 17px;
+  //padding-bottom: 18px;
+`;
+
+const RecommendText = styled(Typography).attrs({text: 'CaptionR'})`
+  color: ${props => props.theme.colors.grey[2]};
+`;
+
+const RecommendBoldText = styled(Typography).attrs({text: 'Title03SB'})`
+  color: ${props =>
+    props.bold ? props.theme.colors.purple[500] : props.theme.colors.grey[2]};
 `;

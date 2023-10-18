@@ -15,7 +15,7 @@ import {totalWrittenReview} from '~biz/useReview/useWrittenReview/store';
 import BackButton from '~components/BackButton';
 import Typography from '~components/Typography';
 import Popup from '~pages/Main/MyPage/Review/Popup';
-export const SCREEN_NAME = 'S_MAIN__REVIEW';
+
 import Review, {PAGE_NAME as ReviewPageName} from '~pages/Main/MyPage/Review';
 import WrittenReview, {
   PAGE_NAME as WrittenReviewPageName,
@@ -24,12 +24,17 @@ import WrittenReview, {
 import {useNavigation} from '@react-navigation/native';
 
 import {PAGE_NAME as MoreMainPageName} from '~pages/Main/Bnb/More/Main';
+import SseRedDot from '../../../utils/sse/SseService/SseRedDot/SseRedDot';
+import useSse from '../../../utils/sse/sseLogics/useSse';
 
 const Tab = createMaterialTopTabNavigator();
 
+export const SCREEN_NAME = 'S_MAIN__REVIEW';
+
 const Screen = ({route}) => {
-  const point = route?.params?.from;
+  const from = route?.params?.from;
   const pointId = route?.params?.id;
+
   const [popupShow, setPopupShow] = useAtom(modalStatusAtom);
   const navigation = useNavigation();
   const theme = useTheme();
@@ -38,7 +43,7 @@ const Screen = ({route}) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () =>
-        point !== 'home' ? (
+        from !== 'home' ? (
           <BackButton margin={[10, 0]} />
         ) : (
           <Pressable
@@ -55,11 +60,13 @@ const Screen = ({route}) => {
     });
   }, []);
 
+  const {sseHistory} = useSse();
+
   return (
     <>
       {popupShow && <Popup setPopupShow={setPopupShow} />}
       <Tab.Navigator
-        initialRouteName={point === 'point' && WrittenReviewPageName}
+        initialRouteName={from === 'point' && WrittenReviewPageName}
         screenOptions={{
           tabBarIndicatorStyle: {
             backgroundColor: theme.colors.grey[1],
@@ -74,9 +81,16 @@ const Screen = ({route}) => {
           component={Review}
           options={({navigation}) => ({
             tabBarLabel: ({focused}) => (
-              <Titles focused={focused}>
-                리뷰 작성({total > 10 ? `9+` : total}){' '}
-              </Titles>
+              <SseRedDotType3
+                // sseType3
+                isSse={total > 0}
+                position={'absolute'}
+                top={'0px'}
+                right={'-8px'}>
+                <Titles focused={focused}>
+                  리뷰 작성({total > 10 ? `9+` : total}){' '}
+                </Titles>
+              </SseRedDotType3>
             ),
             tabBarLabelStyle: {
               fontSize: 15,
@@ -91,9 +105,16 @@ const Screen = ({route}) => {
           component={WrittenReview}
           options={({navigation}) => ({
             tabBarLabel: ({focused}) => (
-              <Titles focused={focused}>
-                작성한 리뷰({totalWritten >= 10 ? `9+` : totalWritten})
-              </Titles>
+              <SseRedDotType8
+                // sseType8
+                isSse={!!sseHistory?.find(v => v.type === 8)}
+                position={'absolute'}
+                top={'0px'}
+                right={'-8px'}>
+                <Titles focused={focused}>
+                  작성한 리뷰({totalWritten >= 10 ? `9+` : totalWritten})
+                </Titles>
+              </SseRedDotType8>
             ),
             tabBarLabelStyle: {
               fontSize: 15,
@@ -115,3 +136,6 @@ const Titles = styled(Typography).attrs({text: 'Button09SB'})`
     return focused ? '600' : '400';
   }};
 `;
+
+const SseRedDotType3 = styled(SseRedDot)``;
+const SseRedDotType8 = styled(SseRedDot)``;

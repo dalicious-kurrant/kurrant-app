@@ -14,9 +14,9 @@ const useGetOneAnnouncements = () => {
   const [isOneAnnouncementModalVisible, setIsOneAnnouncementModalVisible] =
     useState(false);
 
-  const getOneAnnouncement = async (id, spotId) => {
+  const getOneAnnouncement = async () => {
     try {
-      const res = await Fetch.getAnnouncements(id, spotId);
+      const res = await Fetch.getAnnouncements();
 
       const sampleArray = [
         {
@@ -41,10 +41,11 @@ const useGetOneAnnouncements = () => {
       // oneAnnouncements에 하나만 넣기
 
       // 7일이 넘지 않았으면 넣어주고 넘었으면 넣어주지 말기
-
-      const timeObject = JSON.parse(
-        await getStorage('announcementsClickedOneDate'),
+      const announcementsClickedOneDate = await getStorage(
+        'announcementsClickedOneDate',
       );
+
+      const timeObject = JSON.parse(announcementsClickedOneDate);
 
       if (timeObject) {
         if (
@@ -56,7 +57,7 @@ const useGetOneAnnouncements = () => {
         ) {
           // 데이터 새로 넣으면 됨
 
-          setOneAnnouncement(dataFromDb[0]);
+          setOneAnnouncement(res.data);
           setIsOneAnnouncementModalVisible(true);
         } else {
           // undefine d넣어주면 됨
@@ -65,7 +66,7 @@ const useGetOneAnnouncements = () => {
           setIsOneAnnouncementModalVisible(false);
         }
       } else {
-        setOneAnnouncement(dataFromDb[0]);
+        setOneAnnouncement(res.data);
         setIsOneAnnouncementModalVisible(true);
       }
 

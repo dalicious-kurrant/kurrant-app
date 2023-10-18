@@ -43,7 +43,7 @@ const getReissue = async (headers, reqUrl, token, method, options) => {
     body: JSON.stringify(bodyData),
   });
   const result = await reissue.json();
-  console.log(result);
+
   if (result.error === 'E4030002') {
     await AsyncStorage.clear();
     throw new Error(result.statusCode.toString());
@@ -135,6 +135,7 @@ async function json(url, method, options = {}) {
     body: options.body,
   });
   const ret = await res.json();
+
   if (ret.error === 'E4030003' || ret.error === 'E4110003') {
     return await getReissue(headers, reqUrl, token, method, options);
   }

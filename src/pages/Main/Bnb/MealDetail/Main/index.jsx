@@ -1,9 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  useFocusEffect,
-  useIsFocused,
-  useNavigation,
-} from '@react-navigation/native';
+import {useHeaderHeight} from '@react-navigation/elements';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useAtom} from 'jotai';
 import React, {
   useState,
@@ -20,17 +17,29 @@ import {
   Platform,
   TouchableWithoutFeedback,
   FlatList,
+  Animated,
+  Easing,
+  Dimensions,
+  ScrollView,
+  Image,
 } from 'react-native';
+import {ActivityIndicator} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useQueryClient} from 'react-query';
 import styled from 'styled-components';
+import {useTheme} from 'styled-components/native';
+import Arrow from '~assets/icons/Group/arrowDown.svg';
+import BottomSheetSelect from '~components/BottomSheetSelect';
 
 import MealDetailReview from './Review/MealDetailReview';
-import {isCloseToBottomOfScrollView} from './Review/MealDetailReview/logic';
+import Card from './Review/MealDetailReview/Card/index';
+import {modifyStarRatingCount} from './Review/MealDetailReview/logic';
+import OrderSelectController from './Review/MealDetailReview/OrderSelectController/OrderSelectController';
+import useMainReviewHook from './Review/MealDetailReview/useMainReviewHook';
 import BackArrow from '../../../../../assets/icons/MealDetail/backArrow.svg';
 import useAuth from '../../../../../biz/useAuth';
 import {foodDetailDataAtom} from '../../../../../biz/useBanner/store';
 import useFoodDetail from '../../../../../biz/useFoodDetail/hook';
-import {useMainInfiniteScrollQuery} from '../../../../../biz/useReview/useMealDetailReview/useGetMealDetailReview';
 import {useMainReviewInfiniteQuery} from '../../../../../biz/useReview/useMealDetailReview/useMainReviewInfiniteQuery';
 import useShoppingBasket from '../../../../../biz/useShoppingBasket/hook';
 import Badge from '../../../../../components/Badge';
@@ -42,10 +51,12 @@ import {YellowStar} from '../../../../../components/Icon';
 import KeyboardAvoiding from '../../../../../components/KeyboardAvoiding';
 import Label from '../../../../../components/Label';
 import Modal from '../../../../../components/Modal';
+import BottomModalMultipleSelect from '../../../../../components/Review/BottomModalMultipleSelect/BottomModalMultipleSelect';
 import Typography from '../../../../../components/Typography';
 import {useGetDailyfoodDetailNow} from '../../../../../hook/useDailyfood';
 import {useAddShoppingBasket} from '../../../../../hook/useShoppingBasket';
 import {useGetUserInfo} from '../../../../../hook/useUserInfo';
+import {convertDateFormat1} from '../../../../../utils/dateFormatter';
 import {addCommasInEveryThirdDigit} from '../../../../../utils/splitNumberAndUnit';
 import withCommas from '../../../../../utils/withCommas';
 import {PAGE_NAME as MembershipIntroPageName} from '../../../../Membership/MembershipIntro';
@@ -55,46 +66,36 @@ import CarouselImage from '../components/CarouselImage';
 import MembershipDiscountBox from '../components/MembershipDiscountBox';
 import Skeleton from '../Skeleton';
 
+const screenWidth = Dimensions.get('screen').width;
+
 export const PAGE_NAME = 'MEAL_DETAIL_PAGE';
 const Pages = ({route}) => {
   const dailyFoodId = route.params.dailyFoodId;
+  const isMeal = route.params.isMeal;
   const time = route.params.deliveryTime;
-
+  const disableAddCartFromReview = route.params.disableAddCartFromReview;
+  const reviewIdFromWrittenReview = route.params.reviewIdFromWrittenReview;
+  const {width} = Dimensions.get('screen');
+  const headerHeight = useHeaderHeight();
+  const [height, setHeight] = useState([]);
   const bodyRef = useRef();
   const navigation = useNavigation();
   const {balloonEvent, BalloonWrap} = Balloon();
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [selectDefault, setSelectDefault] = useState(dailyFoodId);
+  const [modalOptionVisible, setModalOptionVisible] = useState(false);
   const [focus, setFocus] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [scroll, setScroll] = useState(0);
+  const themeApp = useTheme();
+  const [isScrollOver60, setIsScrollOver60] = useState(false);
+
   const [imgScroll, setImgScroll] = useState(true);
   const [foodDetailData, setFoodDetailData] = useAtom(foodDetailDataAtom);
+  const [childrenFood, setChildrenFood] = useState([]);
   const headerTitle = foodDetailData?.name;
   const {isfoodDetailDiscount} = useFoodDetail(); // 할인정보
   const {foodDetail} = useFoodDetail();
-  const {
-    data: isFoodDetail,
-    isFetching: detailFetching,
-    refetch: detailRefetch,
-  } = useGetDailyfoodDetailNow(route.params.dailyFoodId, userRole); // 상세정보
-
-  const [starAverage, setStarAverage] = useState(1);
-  const [totalReview, setTotalReview] = useState(0);
-  const [initialLoading, setInitialLoading] = useState(false);
-
-  const [url, setUrl] = useState(`/dailyfoods/${dailyFoodId}/review?sort=0`);
-  const {
-    getBoard,
-    getBoardIsFetching: isFetching,
-    getNextPage,
-    getNextPageIsPossible,
-    getBoardRefetch,
-  } = useMainReviewInfiniteQuery(url, dailyFoodId);
-
-  useEffect(() => {
-    getBoardRefetch();
-  }, [url]);
-
   const {
     readableAtom: {userRole},
   } = useAuth();
@@ -104,7 +105,66 @@ const Pages = ({route}) => {
     data: {data: isUserInfo},
   } = useGetUserInfo();
 
-  // console.log(dailyFoodId);
+  const {
+    data: isFoodDetail,
+    isFetching: detailFetching,
+    refetch: detailRefetch,
+  } = useGetDailyfoodDetailNow(selectDefault, userRole); // 상세정보
+
+  const indicatorAnim = useRef(new Animated.Value(0)).current;
+
+  const flatListRef = useRef(null);
+
+  const [isLabelOnMainDetail, setIsLabelOnMainDetail] = useState(true);
+  const [showLabel, setShowLabel] = useState(false);
+
+  useEffect(() => {
+    if (!flatListRef.current) return;
+    flatListRef.current.scrollToOffset({animated: true, offset: 0});
+    flatListRef.current.scrollToOffset({offset: 0});
+  }, [isLabelOnMainDetail]);
+
+  const handleLabelEachPress = (isLabelOnMainDetail, toValue, scrollToX) => {
+    setIsLabelOnMainDetail(isLabelOnMainDetail);
+    Animated.timing(indicatorAnim, {
+      toValue,
+      duration: 500,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  };
+  const {
+    starAverage,
+    totalReview,
+    initialLoading,
+    isFetching,
+
+    getNextPage,
+    getNextPageIsPossible,
+    allReviewList,
+    theme,
+    keyword,
+    reviewWrite,
+    orderFilter,
+    setOrderFilter,
+    isOnlyPhoto,
+    setIsOnlyPhoto,
+    rateSelected,
+    selectedKeyword,
+    setSelectedKeyword,
+    starRatingCounts,
+    showSelectList,
+    setShowSelectList,
+    bottomModalOpen,
+    setBottomModalOpen,
+    handleSelectBottomModal,
+    showSelectedOrderFilter,
+    handleConfirmPress,
+    isFetchingTop,
+    isFetchingBottom,
+
+    setAllReviewList,
+  } = useMainReviewHook(selectDefault, reviewIdFromWrittenReview);
 
   const [count, setCount] = useState(1);
 
@@ -126,7 +186,7 @@ const Pages = ({route}) => {
     ?.map(el =>
       el.cartDailyFoodDtoList.map(v =>
         v.cartDailyFoods.map(c => {
-          if (c.dailyFoodId === dailyFoodId) return c.count;
+          if (c.dailyFoodId === selectDefault) return c.count;
         }),
       ),
     )
@@ -134,9 +194,10 @@ const Pages = ({route}) => {
   const quantity = quantityArr.reduce((acc, val) => [...acc, ...val], []);
   const modifyQty = quantity.reduce((acc, cur) => [...acc, ...cur], []);
   const req = {updateCartList: modifyQty};
+
   useEffect(() => {
     async function loadFoodDetail() {
-      const foodData = await foodDetail(dailyFoodId);
+      const foodData = await foodDetail(selectDefault);
       if (foodData) {
         const meal = await loadMeal();
         if (meal) {
@@ -151,11 +212,11 @@ const Pages = ({route}) => {
     navigation.setOptions({
       headerTransparent: true,
       headerStyle: {
-        backgroundColor: `${scroll < 60 ? 'transparent' : 'white'}`,
+        backgroundColor: `${isScrollOver60 ? 'white' : 'transparent'}`,
       },
-      headerTitle: `${scroll > 60 ? `${headerTitle}` : ''}`,
+      headerTitle: `${isScrollOver60 ? `${headerTitle}` : ''}`,
       headerLeft: () =>
-        scroll > 60 ? (
+        isScrollOver60 ? (
           <Pressable
             onPress={() => navigation.goBack()}
             style={{
@@ -178,21 +239,25 @@ const Pages = ({route}) => {
             <BackArrow color={'#fff'} />
           </Pressable>
         ),
-      headerRight: () =>
-        scroll > 60 ? (
-          <View>
-            <ShoppingCart color={'#343337'} margin={[0, 10]} />
-            <Badge />
-          </View>
-        ) : (
-          <View>
-            <ShoppingCart color={'white'} margin={[0, 10]} />
-            <Badge />
-          </View>
-        ),
+      headerRight: disableAddCartFromReview
+        ? () => {}
+        : () =>
+            isScrollOver60 ? (
+              <View>
+                <ShoppingCart color={'#343337'} margin={[0, 10]} />
+                <Badge />
+              </View>
+            ) : (
+              <View>
+                <ShoppingCart color={'white'} margin={[0, 10]} />
+                <Badge />
+              </View>
+            ),
     });
-  }, [headerTitle, navigation, scroll]);
-
+  }, [headerTitle, navigation, isScrollOver60]);
+  const onSelectOpenModal = () => {
+    setModalOptionVisible(true);
+  };
   const addCartPress = async () => {
     if (userRole === 'ROLE_GUEST') {
       return Alert.alert(
@@ -224,7 +289,7 @@ const Pages = ({route}) => {
     const duplication = isLoadMeal
       ?.map(v =>
         v.cartDailyFoodDtoList.map(el =>
-          el.cartDailyFoods.some(c => c.dailyFoodId === dailyFoodId),
+          el.cartDailyFoods.some(c => c.dailyFoodId === selectDefault),
         ),
       )
       .flat();
@@ -246,7 +311,7 @@ const Pages = ({route}) => {
       }
       await addMeal([
         {
-          dailyFoodId: dailyFoodId,
+          dailyFoodId: selectDefault,
           count: count,
           spotId: isUserInfo?.spotId,
           deliveryTime: time,
@@ -267,8 +332,17 @@ const Pages = ({route}) => {
   };
 
   const handleScroll = e => {
-    const scrollY = e.nativeEvent.contentOffset.y;
-    setScroll(scrollY);
+    if (e.nativeEvent.contentOffset.y > 60) {
+      setIsScrollOver60(true);
+    } else {
+      setIsScrollOver60(false);
+    }
+
+    if (e.nativeEvent.contentOffset.y > (Platform.OS === 'ios' ? 310 : 286)) {
+      setShowLabel(true);
+    } else {
+      setShowLabel(false);
+    }
   };
 
   const focusPress = () => {
@@ -297,293 +371,568 @@ const Pages = ({route}) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (foodDetailData.dailyFoodId !== dailyFoodId) detailRefetch();
-    }, [dailyFoodId, detailRefetch, foodDetailData.dailyFoodId]),
+      if (foodDetailData.dailyFoodId !== selectDefault) detailRefetch();
+    }, [detailRefetch, foodDetailData.dailyFoodId, selectDefault]),
   );
+
   useEffect(() => {
+    setHeight([]);
+    console.log(isFoodDetail?.data);
     if (isFoodDetail?.data) setFoodDetailData(isFoodDetail?.data);
+    if (isFoodDetail?.data?.childrenFoods?.length > 0)
+      setChildrenFood(
+        isFoodDetail?.data?.childrenFoods.map(v => {
+          return {
+            id: v.id,
+            text: v.name + '(' + v.price + ')',
+            value: v.id,
+            status: v.status === 1,
+          };
+        }),
+      );
   }, [isFoodDetail?.data, setFoodDetailData]);
 
+  useEffect(() => {
+    const resizeImage = async image => {
+      await Image.getSize(image, (w, h) => {
+        const sw = Dimensions.get('window').width;
+        const scaleFactor = (sw - 48) / w;
+        const scaledHeight = h * scaleFactor;
+        setHeight([...height, scaledHeight]);
+      });
+    };
+    if (foodDetailData.introImageList?.length > 0)
+      foodDetailData.introImageList.map(image => {
+        return resizeImage(image);
+      });
+  }, [foodDetailData, selectDefault]);
   return (
     <>
       <Wrap>
+        {showLabel && (
+          <LabelViewSticky headerHeight={headerHeight}>
+            <LabelsWrap>
+              <LabelEachPressable
+                onPress={() => {
+                  handleLabelEachPress(true, 0, 0);
+                }}>
+                <LabelEachText focused={isLabelOnMainDetail}>
+                  상세정보
+                </LabelEachText>
+              </LabelEachPressable>
+              <LabelEachPressable
+                onPress={() => {
+                  handleLabelEachPress(false, screenWidth / 2, screenWidth);
+                }}>
+                <LabelEachText focused={!isLabelOnMainDetail}>
+                  리뷰({totalReview})
+                </LabelEachText>
+              </LabelEachPressable>
+            </LabelsWrap>
+
+            <Indicator
+              style={{
+                transform: [{translateX: indicatorAnim}],
+              }}
+            />
+          </LabelViewSticky>
+        )}
+
         <FlatList
-          scrollEnabled={Platform.OS === 'android' ? imgScroll : true}
-          showsVerticalScrollIndicator={false}
-          onScroll={e => handleScroll(e)}
+          ref={flatListRef}
           scrollEventThrottle={16}
           ListHeaderComponent={
-            <View style={{marginBottom: 150}}>
-              {scroll > 60 ? (
-                <StatusBar />
-              ) : (
-                <StatusBar barStyle="light-content" />
-              )}
-              <View style={{position: 'relative'}}>
-                <CarouselImage
-                  detailFetching={detailFetching}
-                  img={foodDetailData?.imageList}
-                  setImgScroll={setImgScroll}
+            <View>
+              {showSelectList && (
+                <OrderSelectController
+                  keyword={keyword}
+                  orderFilter={orderFilter}
+                  setOrderFilter={setOrderFilter}
+                  setShowSelectList={setShowSelectList}
                 />
-                {!detailFetching && (
-                  <DeadlineGuide>
-                    <DeadlineText>
-                      {isFoodDetail?.data?.lastOrderTime} 마감
-                    </DeadlineText>
-                  </DeadlineGuide>
-                )}
-              </View>
-              {!detailFetching ? (
-                <>
-                  <TouchableWithoutFeedback
-                    onPressIn={() => setImgScroll(true)}>
-                    <Content>
-                      <View>
-                        <MakersName>
-                          {detailFetching
-                            ? ''
-                            : foodDetailData?.makersName || ''}
-                        </MakersName>
-                        <MealTitle>
-                          {detailFetching ? '' : foodDetailData?.name || ''}
-                        </MealTitle>
-                        <Line>
-                          <InformationWrap
-                            onPress={() => {
-                              navigation.navigate(MealInformationPageName, {
-                                data: foodDetailData?.origins,
-                                data2: foodDetailData?.allergies,
-                              });
-                            }}>
-                            <InformationText>알레르기/원산지</InformationText>
-                          </InformationWrap>
+              )}
 
-                          {!initialLoading && totalReview >= 1 && (
-                            <ReviewWrap>
-                              <YellowStar width="20px" height="20px" />
-                              <ReviewPoint>
-                                {starAverage &&
-                                starAverage?.toString().length === 1
-                                  ? starAverage.toFixed(1)
-                                  : starAverage}
-                              </ReviewPoint>
-                              <ReviewCount>({totalReview})</ReviewCount>
-                            </ReviewWrap>
-                          )}
-                        </Line>
-                        <MealDsc>
-                          {detailFetching ? '' : foodDetailData?.description}
-                        </MealDsc>
+              <FlatList
+                ref={flatListRef}
+                scrollEnabled={Platform.OS === 'android' ? imgScroll : true}
+                // showsVerticalScrollIndicator={false}
 
-                        {foodDetailData?.spicy !== null && (
-                          <Label label={`${foodDetailData?.spicy}`} />
-                        )}
-                        <PriceTitleWrap>
-                          <PriceTitle>최종 판매가</PriceTitle>
-                          <ModalWrap>
-                            <Modal
-                              id={dailyFoodId}
-                              price={foodDetailData?.price || 0}
-                              membershipDiscountedPrice={
-                                foodDetailData?.membershipDiscountedPrice || 0
-                              }
-                              membershipDiscountedRate={
-                                foodDetailData?.membershipDiscountedRate || 0
-                              }
-                              makersDiscountedPrice={
-                                foodDetailData?.makersDiscountedPrice || 0
-                              }
-                              makersDiscountedRate={
-                                foodDetailData?.makersDiscountedRate || 0
-                              }
-                              periodDiscountedPrice={
-                                foodDetailData?.periodDiscountedPrice || 0
-                              }
-                              periodDiscountedRate={
-                                foodDetailData?.periodDiscountedRate || 0
-                              }
-                              totalDiscountRate={realToTalDiscountRate || 0}
-                              discountPrice={discountPrice || 0}
-                            />
-                          </ModalWrap>
-                        </PriceTitleWrap>
-                        <PriceWrap>
-                          {realToTalDiscountRate !== 0 && (
-                            <Percent>
-                              {detailFetching
-                                ? 0
-                                : Math.round(
-                                    Math.round(realToTalDiscountRate * 100) /
-                                      100,
-                                  )}
-                              %
-                            </Percent>
-                          )}
-                          {realToTalDiscountRate !== 0 && (
-                            <SalePrice>
-                              {detailFetching
-                                ? 0
-                                : withCommas(
-                                    foodDetailData?.price - discountPrice,
-                                  )}
-                              원
-                            </SalePrice>
-                          )}
-                          {realToTalDiscountRate === 0 && (
-                            <NoSalePrice>
-                              {detailFetching
-                                ? 0
-                                : withCommas(foodDetailData?.price)}
-                              원
-                            </NoSalePrice>
-                          )}
-                          {realToTalDiscountRate !== 0 && (
-                            <Price>
-                              {detailFetching
-                                ? 0
-                                : withCommas(foodDetailData?.price)}
-                              원
-                            </Price>
-                          )}
-                        </PriceWrap>
-                      </View>
-
-                      {!foodDetailData?.isMembership && (
-                        <MembershipDiscountBox
-                          isFoodDetail={foodDetailData}
-                          setModalVisible2={setModalVisible2}
-                          modalVisible2={modalVisible2}
-                        />
+                onScroll={e => handleScroll(e)}
+                scrollEventThrottle={16}
+                ListHeaderComponent={
+                  <View style={{marginBottom: isLabelOnMainDetail ? 150 : 0}}>
+                    {isScrollOver60 ? (
+                      <StatusBar />
+                    ) : (
+                      <StatusBar barStyle="light-content" />
+                    )}
+                    <View style={{position: 'relative'}}>
+                      <CarouselImage
+                        detailFetching={detailFetching}
+                        img={foodDetailData?.imageList}
+                        setImgScroll={setImgScroll}
+                      />
+                      {!detailFetching && (
+                        <DeadlineGuide>
+                          <DeadlineText>
+                            {isFoodDetail?.data?.lastOrderTime} 마감
+                          </DeadlineText>
+                        </DeadlineGuide>
                       )}
-                    </Content>
-                  </TouchableWithoutFeedback>
-                  <Content>
-                    <InfoWrap>
-                      <InfoTitleView>
-                        <InfoTitle>할인 내역</InfoTitle>
-                      </InfoTitleView>
-                      <InfoTextView>
-                        <InfoTextWrap>
-                          {foodDetailData?.membershipDiscountedRate !== 0 ? (
-                            <Info>멤버십 할인</Info>
+                    </View>
+
+                    {!detailFetching && (
+                      <LabelView>
+                        <LabelsWrap>
+                          <LabelEachPressable
+                            onPress={() => {
+                              handleLabelEachPress(true, 0, 0);
+                            }}>
+                            <LabelEachText focused={isLabelOnMainDetail}>
+                              상세정보
+                            </LabelEachText>
+                          </LabelEachPressable>
+                          <LabelEachPressable
+                            onPress={() => {
+                              handleLabelEachPress(
+                                false,
+                                screenWidth / 2,
+                                screenWidth,
+                              );
+                            }}>
+                            <LabelEachText focused={!isLabelOnMainDetail}>
+                              리뷰({totalReview})
+                            </LabelEachText>
+                          </LabelEachPressable>
+                        </LabelsWrap>
+
+                        <Indicator
+                          style={{
+                            transform: [{translateX: indicatorAnim}],
+                          }}
+                        />
+                      </LabelView>
+                    )}
+
+                    <TextView>
+                      {isLabelOnMainDetail && (
+                        <EachPage>
+                          {!detailFetching ? (
+                            <DetailView>
+                              <TouchableWithoutFeedback
+                                onPressIn={() => setImgScroll(true)}>
+                                <Content>
+                                  <View>
+                                    <MakersName>
+                                      {detailFetching
+                                        ? ''
+                                        : foodDetailData?.makersName || ''}
+                                    </MakersName>
+                                    <MealTitle>
+                                      {detailFetching
+                                        ? ''
+                                        : foodDetailData?.name || ''}
+                                    </MealTitle>
+                                    <Line>
+                                      <InformationWrap
+                                        onPress={() => {
+                                          navigation.navigate(
+                                            MealInformationPageName,
+                                            {
+                                              data: foodDetailData?.origins,
+                                              data2: foodDetailData?.allergies,
+                                            },
+                                          );
+                                        }}>
+                                        <InformationText>
+                                          알레르기/원산지
+                                        </InformationText>
+                                      </InformationWrap>
+
+                                      {!initialLoading && totalReview >= 1 && (
+                                        <ReviewWrap>
+                                          <YellowStar
+                                            width="20px"
+                                            height="20px"
+                                          />
+                                          <ReviewPoint>
+                                            {starAverage &&
+                                            starAverage?.toString().length === 1
+                                              ? starAverage.toFixed(1)
+                                              : starAverage}
+                                          </ReviewPoint>
+                                          <ReviewCount>
+                                            ({totalReview})
+                                          </ReviewCount>
+                                        </ReviewWrap>
+                                      )}
+                                    </Line>
+                                    <MealDsc>
+                                      {detailFetching
+                                        ? ''
+                                        : foodDetailData?.description}
+                                    </MealDsc>
+
+                                    {foodDetailData?.spicy !== null && (
+                                      <Label
+                                        label={`${foodDetailData?.spicy}`}
+                                      />
+                                    )}
+                                    {foodDetailData?.childrenFoods?.length >
+                                      0 && (
+                                      <DefaultCardBox>
+                                        <SpotView onPress={onSelectOpenModal}>
+                                          <SpotName>
+                                            {' '}
+                                            {foodDetailData?.childrenFoods?.find(
+                                              v => v.id === selectDefault,
+                                            )
+                                              ? foodDetailData?.childrenFoods?.find(
+                                                  v => v.id === selectDefault,
+                                                ).name
+                                              : '선택'}
+                                          </SpotName>
+                                          <Arrow />
+                                        </SpotView>
+                                      </DefaultCardBox>
+                                    )}
+                                    <PriceTitleWrap>
+                                      <PriceTitle>최종 판매가</PriceTitle>
+                                      <ModalWrap>
+                                        <Modal
+                                          id={selectDefault}
+                                          price={foodDetailData?.price || 0}
+                                          membershipDiscountedPrice={
+                                            foodDetailData?.membershipDiscountedPrice ||
+                                            0
+                                          }
+                                          membershipDiscountedRate={
+                                            foodDetailData?.membershipDiscountedRate ||
+                                            0
+                                          }
+                                          makersDiscountedPrice={
+                                            foodDetailData?.makersDiscountedPrice ||
+                                            0
+                                          }
+                                          makersDiscountedRate={
+                                            foodDetailData?.makersDiscountedRate ||
+                                            0
+                                          }
+                                          periodDiscountedPrice={
+                                            foodDetailData?.periodDiscountedPrice ||
+                                            0
+                                          }
+                                          periodDiscountedRate={
+                                            foodDetailData?.periodDiscountedRate ||
+                                            0
+                                          }
+                                          totalDiscountRate={
+                                            realToTalDiscountRate || 0
+                                          }
+                                          discountPrice={discountPrice || 0}
+                                        />
+                                      </ModalWrap>
+                                    </PriceTitleWrap>
+                                    <PriceWrap>
+                                      {realToTalDiscountRate !== 0 && (
+                                        <Percent>
+                                          {detailFetching
+                                            ? 0
+                                            : Math.round(
+                                                Math.round(
+                                                  realToTalDiscountRate * 100,
+                                                ) / 100,
+                                              )}
+                                          %
+                                        </Percent>
+                                      )}
+                                      {realToTalDiscountRate !== 0 && (
+                                        <SalePrice>
+                                          {detailFetching
+                                            ? 0
+                                            : withCommas(
+                                                foodDetailData?.price -
+                                                  discountPrice,
+                                              )}
+                                          원
+                                        </SalePrice>
+                                      )}
+                                      {realToTalDiscountRate === 0 && (
+                                        <NoSalePrice>
+                                          {detailFetching
+                                            ? 0
+                                            : withCommas(foodDetailData?.price)}
+                                          원
+                                        </NoSalePrice>
+                                      )}
+                                      {realToTalDiscountRate !== 0 && (
+                                        <Price>
+                                          {detailFetching
+                                            ? 0
+                                            : withCommas(foodDetailData?.price)}
+                                          원
+                                        </Price>
+                                      )}
+                                    </PriceWrap>
+                                  </View>
+
+                                  {!foodDetailData?.isMembership && (
+                                    <MembershipDiscountBox
+                                      isFoodDetail={foodDetailData}
+                                      setModalVisible2={setModalVisible2}
+                                      modalVisible2={modalVisible2}
+                                    />
+                                  )}
+                                </Content>
+                              </TouchableWithoutFeedback>
+                              <Content>
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>할인 내역</InfoTitle>
+                                  </InfoTitleView>
+                                  <InfoTextView>
+                                    <InfoTextWrap>
+                                      {foodDetailData?.membershipDiscountedRate !==
+                                      0 ? (
+                                        <Info>멤버십 할인</Info>
+                                      ) : (
+                                        <Info>멤버십 가입시 할인</Info>
+                                      )}
+                                      {foodDetailData?.membershipDiscountedRate !==
+                                      0 ? (
+                                        <InfoText>
+                                          {
+                                            foodDetailData?.membershipDiscountedRate
+                                          }
+                                          %
+                                        </InfoText>
+                                      ) : (
+                                        <InfoText>
+                                          {
+                                            isfoodDetailDiscount?.membershipDiscountRate
+                                          }
+                                          %
+                                        </InfoText>
+                                      )}
+                                    </InfoTextWrap>
+                                    <InfoTextWrap>
+                                      <Info>판매자 할인</Info>
+                                      <InfoText>
+                                        {foodDetailData?.makersDiscountedRate}%
+                                      </InfoText>
+                                    </InfoTextWrap>
+                                    <InfoTextWrap>
+                                      <Info>기간 할인</Info>
+                                      <InfoText>
+                                        {foodDetailData?.periodDiscountedRate}%
+                                      </InfoText>
+                                    </InfoTextWrap>
+                                  </InfoTextView>
+                                </InfoWrap>
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>배송 정보</InfoTitle>
+                                  </InfoTitleView>
+                                  <InfoTextView>
+                                    <InfoTextWrap>
+                                      <Info>개별 배송</Info>
+                                      <InfoText>3,500원</InfoText>
+                                    </InfoTextWrap>
+                                    <InfoTextWrap>
+                                      <Info>멤버십 회원</Info>
+                                      <InfoText>무료 배송</InfoText>
+                                    </InfoTextWrap>
+                                  </InfoTextView>
+                                </InfoWrap>
+                              </Content>
+                              <MakersIntroImageContainer>
+                                {foodDetailData.introImageList?.length > 0 &&
+                                  foodDetailData.introImageList.map(
+                                    (image, i) => {
+                                      return (
+                                        <FastImage
+                                          key={image}
+                                          source={{
+                                            uri: image,
+                                            priority: FastImage.priority.high,
+                                          }}
+                                          style={{
+                                            width: '100%',
+                                            height: height[i],
+                                            backgroundColor: 'gold',
+                                          }}
+                                          resizeMode="stretch"
+                                        />
+                                      );
+                                    },
+                                  )}
+                              </MakersIntroImageContainer>
+                              {/* 식단레포트 */}
+                              {/* <Content>
+                                <InfoWrap>
+                                  <InfoTitleView>
+                                    <InfoTitle>영양 정보</InfoTitle>
+                                  </InfoTitleView>
+                                  <InfoTextView>
+                                    <InfoTextWrap>
+                                      <Info>칼로리</Info>
+                                      <InfoText>
+                                        {isFoodDetail?.calorie
+                                          ? addCommasInEveryThirdDigit(
+                                              isFoodDetail?.calorie,
+                                            )
+                                          : 0}
+                                        kcal
+                                      </InfoText>
+                                    </InfoTextWrap>
+                                    <InfoTextWrap>
+                                      <Info>탄수화물</Info>
+                                      <InfoText>
+                                        {isFoodDetail?.carbohydrate
+                                          ? addCommasInEveryThirdDigit(
+                                              isFoodDetail?.carbohydrate,
+                                            )
+                                          : 0}
+                                        g
+                                      </InfoText>
+                                    </InfoTextWrap>
+                                    <InfoTextWrap>
+                                      <Info>단백질</Info>
+                                      <InfoText>
+                                        {' '}
+                                        {isFoodDetail?.protein
+                                          ? addCommasInEveryThirdDigit(
+                                              isFoodDetail?.protein,
+                                            )
+                                          : 0}
+                                        g
+                                      </InfoText>
+                                    </InfoTextWrap>
+                                    <InfoTextWrap>
+                                      <Info>지방</Info>
+                                      <InfoText>
+                                        {isFoodDetail?.fat
+                                          ? addCommasInEveryThirdDigit(
+                                              isFoodDetail?.fat,
+                                            )
+                                          : 0}
+                                        g
+                                      </InfoText>
+                                    </InfoTextWrap>
+                                  </InfoTextView>
+                                </InfoWrap>
+                              </Content> */}
+                            </DetailView>
                           ) : (
-                            <Info>멤버십 가입시 할인</Info>
+                            <Skeleton />
                           )}
-                          {foodDetailData?.membershipDiscountedRate !== 0 ? (
-                            <InfoText>
-                              {foodDetailData?.membershipDiscountedRate}%
-                            </InfoText>
+                        </EachPage>
+                      )}
+
+                      {!isLabelOnMainDetail && (
+                        <EachPage>
+                          {!detailFetching ? (
+                            <MealDetailReview
+                              foodName={foodDetailData?.name}
+                              imageLocation={foodDetailData?.imageList}
+                              dailyFoodId={selectDefault}
+                              starAverage={starAverage}
+                              totalReview={totalReview}
+                              initialLoading={initialLoading}
+                              reviewIdFromWrittenReview={
+                                reviewIdFromWrittenReview
+                              }
+                              theme={theme}
+                              navigation={navigation}
+                              keyword={keyword}
+                              reviewWrite={reviewWrite}
+                              orderFilter={orderFilter}
+                              setOrderFilter={setOrderFilter}
+                              isOnlyPhoto={isOnlyPhoto}
+                              setIsOnlyPhoto={setIsOnlyPhoto}
+                              rateSelected={rateSelected}
+                              selectedKeyword={selectedKeyword}
+                              setSelectedKeyword={setSelectedKeyword}
+                              starRatingCounts={starRatingCounts}
+                              showSelectList={showSelectList}
+                              setShowSelectList={setShowSelectList}
+                              bottomModalOpen={bottomModalOpen}
+                              setBottomModalOpen={setBottomModalOpen}
+                              handleSelectBottomModal={handleSelectBottomModal}
+                              showSelectedOrderFilter={showSelectedOrderFilter}
+                              handleConfirmPress={handleConfirmPress}
+                              isFetchingTop={isFetchingTop}
+                            />
                           ) : (
-                            <InfoText>
-                              {isfoodDetailDiscount?.membershipDiscountRate}%
-                            </InfoText>
+                            <Skeleton />
                           )}
-                        </InfoTextWrap>
-                        <InfoTextWrap>
-                          <Info>판매자 할인</Info>
-                          <InfoText>
-                            {foodDetailData?.makersDiscountedRate}%
-                          </InfoText>
-                        </InfoTextWrap>
-                        <InfoTextWrap>
-                          <Info>기간 할인</Info>
-                          <InfoText>
-                            {foodDetailData?.periodDiscountedRate}%
-                          </InfoText>
-                        </InfoTextWrap>
-                      </InfoTextView>
-                    </InfoWrap>
-                    <InfoWrap>
-                      <InfoTitleView>
-                        <InfoTitle>배송 정보</InfoTitle>
-                      </InfoTitleView>
-                      <InfoTextView>
-                        <InfoTextWrap>
-                          <Info>개별 배송</Info>
-                          <InfoText>3,500원</InfoText>
-                        </InfoTextWrap>
-                        <InfoTextWrap>
-                          <Info>멤버십 회원</Info>
-                          <InfoText>무료 배송</InfoText>
-                        </InfoTextWrap>
-                      </InfoTextView>
-                    </InfoWrap>
-                  </Content>
-                  {/* 식단 레포트 영양 정보 */}
-                  {/* <Content>
-                    <InfoWrap>
-                      <InfoTitleView>
-                        <InfoTitle>영양 정보</InfoTitle>
-                      </InfoTitleView>
-                      <InfoTextView>
-                        <InfoTextWrap>
-                          <Info>칼로리</Info>
-                          <InfoText>
-                            {isFoodDetail?.calorie
-                              ? addCommasInEveryThirdDigit(
-                                  isFoodDetail?.calorie,
-                                )
-                              : 0}
-                            kcal
-                          </InfoText>
-                        </InfoTextWrap>
-                        <InfoTextWrap>
-                          <Info>탄수화물</Info>
-                          <InfoText>
-                            {isFoodDetail?.carbohydrate
-                              ? addCommasInEveryThirdDigit(
-                                  isFoodDetail?.carbohydrate,
-                                )
-                              : 0}
-                            g
-                          </InfoText>
-                        </InfoTextWrap>
-                        <InfoTextWrap>
-                          <Info>단백질</Info>
-                          <InfoText>
-                            {' '}
-                            {isFoodDetail?.protein
-                              ? addCommasInEveryThirdDigit(
-                                  isFoodDetail?.protein,
-                                )
-                              : 0}
-                            g
-                          </InfoText>
-                        </InfoTextWrap>
-                        <InfoTextWrap>
-                          <Info>지방</Info>
-                          <InfoText>
-                            {isFoodDetail?.fat
-                              ? addCommasInEveryThirdDigit(isFoodDetail?.fat)
-                              : 0}
-                            g
-                          </InfoText>
-                        </InfoTextWrap>
-                      </InfoTextView>
-                    </InfoWrap>
-                  </Content> */}
-                  {/* 리뷰자리 */}
-                  <MealDetailReview
-                    foodName={foodDetailData?.name}
-                    imageLocation={foodDetailData?.imageList}
-                    dailyFoodId={dailyFoodId}
-                    starAverage={starAverage}
-                    setStarAverage={setStarAverage}
-                    totalReview={totalReview}
-                    setTotalReview={setTotalReview}
-                    initialLoading={initialLoading}
-                    setInitialLoading={setInitialLoading}
-                    url={url}
-                    setUrl={setUrl}
-                    getBoard={getBoard}
-                    isFetching={isFetching}
-                    getNextPage={getNextPage}
-                    getNextPageIsPossible={getNextPageIsPossible}
-                    getBoardRefetch={getBoardRefetch}
-                  />
+                        </EachPage>
+                      )}
+                    </TextView>
+                  </View>
+                }
+                data={[
+                  ...allReviewList,
+                  {
+                    reviewId: 'filler',
+                    isFiller: 'filler',
+                  },
+                ]}
+                keyExtractor={item => item.reviewId.toString()}
+                renderItem={
+                  isLabelOnMainDetail
+                    ? undefined
+                    : ({item}) => {
+                        if (item.reviewId === 'filler') {
+                          return (
+                            <Filler
+                              isReviewIdFromWrittenReview={
+                                !!reviewIdFromWrittenReview
+                              }
+                            />
+                          );
+                        } else {
+                          return (
+                            <Card
+                              key={item.reviewId}
+                              dailyFoodId={selectDefault}
+                              id={item.reviewId}
+                              userName={item.userName}
+                              item={item}
+                              good={item.good}
+                              isGood={item.isGood}
+                              createDate={item.createDate}
+                              updateDate={item.updateDate}
+                              writtenDate={convertDateFormat1(item.createDate)}
+                              option={item.option}
+                              rating={item.satisfaction}
+                              reviewText={item.content}
+                              imageLocation={item.imageLocation}
+                              forMakers={item.forMakers}
+                              commentList={item.commentList}
+                              isFetching={isFetching}
+                              allReviewList={allReviewList}
+                              setAllReviewList={setAllReviewList}
+                            />
+                          );
+                        }
+                      }
+                }
+                onEndReached={() => {
+                  if (!isLabelOnMainDetail && getNextPageIsPossible) {
+                    getNextPage();
+                  }
+                }}
+                onEndReachedThreshold={0.1}
+              />
+              {!isLabelOnMainDetail && isFetchingBottom && (
+                <>
+                  <ReviewListWrap>
+                    <LoadingPage>
+                      <ActivityIndicator size={'large'} />
+                    </LoadingPage>
+                  </ReviewListWrap>
                 </>
-              ) : (
-                <Skeleton />
               )}
             </View>
           }
@@ -600,7 +949,7 @@ const Pages = ({route}) => {
           count={count}
           value={count.toString()}
         />
-        {!focus && (
+        {!disableAddCartFromReview && !focus && !isMeal && (
           <ButtonWrap>
             <Button
               price={foodDetailData?.price - discountPrice}
@@ -656,6 +1005,15 @@ const Pages = ({route}) => {
               isFounders: isUserInfo?.data?.leftFoundersNumber > 0,
             });
           }}
+        />
+        <BottomSheetSelect
+          modalVisible={modalOptionVisible}
+          setModalVisible={setModalOptionVisible}
+          title="옵션"
+          data={childrenFood}
+          selected={selectDefault}
+          setSelected={setSelectDefault}
+          firstSnap={'50%'}
         />
       </Wrap>
     </>
@@ -730,7 +1088,10 @@ const ModalWrap = styled.View`
 const MakersName = styled(Typography).attrs({text: 'Body06SB'})`
   color: ${props => props.theme.colors.grey[2]};
 `;
-
+const MakersIntroImageContainer = styled.View`
+  width: 100%;
+  padding: 24px;
+`;
 const MealTitle = styled(Typography).attrs({text: 'LargeTitle'})`
   color: ${props => props.theme.colors.grey[2]};
   margin-bottom: 8px;
@@ -812,4 +1173,116 @@ const ReviewPoint = styled(Typography).attrs({text: 'Body05SB'})`
 const ReviewCount = styled(Typography).attrs({text: 'Body05R'})`
   color: ${props => props.theme.colors.grey[2]};
   margin-left: 4px;
+`;
+
+const LabelViewSticky = styled(Animated.View)`
+  width: 100%;
+  height: 43px;
+  border-bottom-width: 1px;
+  border-bottom-color: ${props => props.theme.colors.grey[8]};
+
+  position: absolute;
+  top: ${({headerHeight}) => {
+    // if (Platform.OS === 'ios') {
+    //   return `74px`;
+    // } else if (Platform.OS === 'android') {
+    //   return `94px`;
+    // }
+    return `${headerHeight}px`;
+  }};
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background-color: white;
+`;
+const LabelView = styled.View`
+  width: 100%;
+  height: 43px;
+  border-bottom-width: 1px;
+  border-bottom-color: ${props => props.theme.colors.grey[8]};
+`;
+
+const LabelsWrap = styled.View`
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+`;
+const Indicator = styled(Animated.View)`
+  width: 50%;
+  height: 2px;
+
+  border-bottom-width: 2px;
+  border-bottom-color: ${props => props.theme.colors.grey[1]};
+`;
+
+const LabelEachPressable = styled.Pressable`
+  width: 50%;
+  height: 100%;
+
+  align-items: center;
+  justify-content: center;
+`;
+
+const LabelEachText = styled(Typography).attrs({text: 'Button09SB'})`
+  color: ${({theme}) => theme.colors.grey[2]};
+  font-weight: ${({focused}) => {
+    return focused ? '600' : '400';
+  }};
+`;
+
+const DetailView = styled.View``;
+
+const TextView = styled.View`
+  width: ${() => `${screenWidth}px`};
+
+  flex-direction: row;
+`;
+
+const EachPage = styled.View`
+  flex: 1;
+  width: ${() => `${screenWidth}px`};
+`;
+
+const ReviewListWrap = styled.View`
+  width: 100%;
+`;
+
+const LoadingPage = styled.View`
+  position: relative;
+  top: -80px;
+
+  background-color: transparent;
+  opacity: 0.5;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  padding-top: 10px;
+`;
+
+const Filler = styled.View`
+  width: 100%;
+  height: ${({reviewIdFromWrittenReview}) => {
+    if (reviewIdFromWrittenReview) {
+      return 60;
+    } else {
+      return 100;
+    }
+  }}px;
+`;
+
+const DefaultCardBox = styled.View``;
+
+const SpotView = styled.Pressable`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 24px;
+  border: 1px solid ${({theme}) => theme.colors.grey[7]};
+  border-radius: 14px;
+  width: 100%;
+  margin-top: 16px;
+`;
+const SpotName = styled(Typography).attrs({text: 'Body05R'})`
+  color: ${({theme}) => theme.colors.grey[2]};
 `;

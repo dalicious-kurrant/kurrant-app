@@ -1,6 +1,11 @@
+import {
+  findClosestCoordinate,
+  findClosestLocation,
+} from '../pages/Map/components/location';
+
 const id = 'frbi51gn4o';
 const key = 'QwC8dsoAGD8XBDYV1ykHflWQp0b7KbIRd1Hzr97P';
-
+const kakaoKey = 'ecca029eb4635c04980ca7e0906fd87c';
 export const mapApis = {
   // 네이버 지도 도로명 주소 , 우편 번호
   getRoadAddress: async (longitude, latitude) => {
@@ -69,7 +74,6 @@ export const mapApis = {
   },
   // 카카오 주소 검색
   searchObject: async query => {
-    const key = 'ecca029eb4635c04980ca7e0906fd87c';
     const lat = 37.49703;
     const lng = 127.028191;
     const sort = 'accuracy';
@@ -79,7 +83,7 @@ export const mapApis = {
     const res = await fetch(apiUrl, {
       method: 'GET',
       headers: {
-        Authorization: `KakaoAK ${key}`,
+        Authorization: `KakaoAK ${kakaoKey}`,
       },
     });
     const result = await res.json();
@@ -92,7 +96,38 @@ export const mapApis = {
     const addrRes = await fetch(addrApiUrl, {
       method: 'GET',
       headers: {
-        Authorization: `KakaoAK ${key}`,
+        Authorization: `KakaoAK ${kakaoKey}`,
+      },
+    });
+    const addrResult = await addrRes.json();
+
+    return addrResult.documents;
+  },
+
+  getMakersAddress: async (query, location) => {
+    const lat = location.latitude.toString();
+    const lng = location.longitude.toString();
+    const sort = 'distance';
+
+    const apiUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${query}&x=${lng}&y=${lat}&sort=${sort}&category_group_code=FD6`;
+
+    const res = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `KakaoAK ${kakaoKey}`,
+      },
+    });
+    const result = await res.json();
+
+    if (result.documents.length > 0) {
+      return result.documents;
+    }
+    const addrApiUrl = `https://dapi.kakao.com/v2/local/search/address.json?query=${query}&x=${lat}&y=${lng}`;
+
+    const addrRes = await fetch(addrApiUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `KakaoAK ${kakaoKey}`,
       },
     });
     const addrResult = await addrRes.json();

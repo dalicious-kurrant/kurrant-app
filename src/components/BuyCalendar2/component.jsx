@@ -148,6 +148,7 @@ const Component = ({
                       dinnerServiceDays[0]?.serviceDays?.includes(txt)) ||
                     false;
                   const events = () => {
+                    console.log(day, propsDay);
                     selectedPress(day);
                     onPressEvent2(propsDay);
                   };
@@ -167,10 +168,7 @@ const Component = ({
                       key={day}
                       idx={idx}
                       disabled={
-                        (lastDay && true) ||
-                        (nowPage === 1 && morning === false) ||
-                        (nowPage === 2 && lunch === false) ||
-                        (nowPage === 3 && dinner === false)
+                        (lastDay || !(morning || lunch || dinner)) && true
                       }
                       onPress={() => {
                         onPressEvent
